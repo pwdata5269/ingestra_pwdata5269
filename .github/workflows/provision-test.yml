@@ -1,0 +1,62 @@
+name: provision-test
+
+on:
+  workflow_dispatch:
+    inputs:
+      pinecone_index_name:
+        description: Pinecone index name
+        required: true
+        default: ingestra-ci
+      pinecone_dimension:
+        description: Embedding dimension
+        required: true
+        default: "384"
+      run_smoke_tests:
+        description: Run smoke tests after provisioning
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  provision:
+    runs-on: windows-latest
+    env:
+      PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_ORG_SLUG: ${{ secrets.SUPABASE_ORG_SLUG }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      INGESTRA_UPLOAD_URL: ${{ secrets.INGESTRA_UPLOAD_URL }}
+      INGESTRA_SEARCH_URL: ${{ secrets.INGESTRA_SEARCH_URL }}
+      INGESTRA_CHAT_URL: ${{ secrets.INGESTRA_CHAT_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate provision bootstrap contract
+        shell: pwsh
+        run: |
+          .\scripts\Test-BootstrapPrereqs.ps1 -Profile provision
+
+      - name: Ensure Pinecone index
+        shell: pwsh
+        run: |
+          .\scripts\providers\Pinecone.ps1 `
+            -Action EnsureIndex `
+            -IndexName "${{ inputs.pinecone_index_name }}" `
+            -Dimension ${{ inputs.pinecone_dimension }} `
+            -Metric cosine `
+            -Cloud aws `
+            -Region us-east-1
+
+      - name: Validate smoke-test bootstrap contract
+        if: ${{ inputs.run_smoke_tests }}
+        shell: pwsh
+        run: |
+          .\scripts\Test-BootstrapPrereqs.ps1 -Profile smoke
+
+      - name: Run smoke tests
+        if: ${{ inputs.run_smoke_tests }}
+        shell: pwsh
+        run: |
+          .\scripts\Invoke-IngestraSmokeTests.ps1

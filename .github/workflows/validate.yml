@@ -1,0 +1,27 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  pester:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Pester
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.6.0
+          Invoke-Pester -Path .\tests -CI
+
+      - name: Validate minimal bootstrap profile
+        shell: pwsh
+        run: |
+          .\scripts\Test-BootstrapPrereqs.ps1 -Profile minimal
