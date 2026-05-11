@@ -422,6 +422,49 @@ Acceptance:
 - all Azure bootstrap values are available
 - permissions/consent status is known
 
+### Phase 4A. Create the Azure App Registration for Supabase Login
+
+Objective:
+
+- create the Azure application that `Supabase Auth` will use for user sign-in
+
+Actions:
+
+1. Open `Microsoft Entra ID`.
+2. Create a new `App registration` for this project.
+3. Record:
+   - `Application (client) ID`
+   - `Directory (tenant) ID`
+4. Create a client secret for the app registration.
+5. Record the client secret value immediately.
+6. Add the Supabase callback URL as the redirect URI:
+   - `https://<supabase-project-ref>.supabase.co/auth/v1/callback`
+7. In `Supabase Auth`, configure the Azure provider with:
+   - Azure client ID
+   - Azure client secret
+   - tenant URL:
+     - `https://login.microsoftonline.com/<tenant-id>`
+
+Required outputs:
+
+- Azure client ID
+- Azure tenant ID
+- Azure client secret
+- confirmed Supabase callback URL
+
+Permissions:
+
+- for the sign-in app registration, keep permissions minimal
+- do not treat broad Graph write permissions as required for this step
+- only keep broad Graph application permissions on a separate bootstrap identity if Azure app-registration creation is going to be automated later
+
+Acceptance:
+
+- the Azure app registration exists
+- the client secret exists and has been recorded
+- the Supabase callback URL is configured
+- the Azure provider values needed by Supabase are available
+
 ### Phase 5. Create or Confirm the Supabase Organization
 
 Objective:
