@@ -17,6 +17,9 @@ function Get-IngestraRequiredSecretNames {
         }
         "provision" {
             return @(
+                "AZURE_TENANT_ID",
+                "AZURE_CLIENT_ID",
+                "AZURE_CLIENT_SECRET",
                 "PINECONE_API_KEY",
                 "SUPABASE_ACCESS_TOKEN",
                 "SUPABASE_ORG_SLUG",
@@ -145,9 +148,45 @@ function Write-IngestraSummary {
     Add-Content -LiteralPath $summaryPath -Value ($Lines -join [Environment]::NewLine)
 }
 
+function Set-IngestraOutput {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name,
+
+        [Parameter(Mandatory)]
+        [AllowEmptyString()]
+        [string]$Value
+    )
+
+    $outputPath = [Environment]::GetEnvironmentVariable("GITHUB_OUTPUT")
+    if ([string]::IsNullOrWhiteSpace($outputPath)) {
+        return
+    }
+
+    Add-Content -LiteralPath $outputPath -Value ("{0}={1}" -f $Name, $Value)
+}
+
+function Add-IngestraMask {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [AllowEmptyString()]
+        [string]$Value
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return
+    }
+
+    Write-Host ("::add-mask::{0}" -f $Value)
+}
+
 Export-ModuleMember -Function Get-IngestraRequiredSecretNames
 Export-ModuleMember -Function Test-IngestraSecretsPresent
 Export-ModuleMember -Function Invoke-IngestraApiRequest
 Export-ModuleMember -Function Get-IngestraAutomationConfig
 Export-ModuleMember -Function Get-IngestraAutomationConfigSection
 Export-ModuleMember -Function Write-IngestraSummary
+Export-ModuleMember -Function Set-IngestraOutput
+Export-ModuleMember -Function Add-IngestraMask

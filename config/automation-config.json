@@ -1,4 +1,13 @@
 {
+  "azure": {
+    "createSupabaseLoginApp": true,
+    "supabaseLoginAppName": "ingestra-supabase-login",
+    "signInAudience": "AzureADMyOrg",
+    "optionalClaims": [
+      "xms_edov",
+      "email"
+    ]
+  },
   "supabase": {
     "createProject": true,
     "projectName": "ingestra-ci",

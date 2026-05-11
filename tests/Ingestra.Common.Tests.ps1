@@ -4,6 +4,9 @@ Describe "Get-IngestraRequiredSecretNames" {
     It "returns provision secrets for the provision profile" {
         $names = Get-IngestraRequiredSecretNames -Profile provision
 
+        ($names -contains "AZURE_TENANT_ID") | Should -Be $true
+        ($names -contains "AZURE_CLIENT_ID") | Should -Be $true
+        ($names -contains "AZURE_CLIENT_SECRET") | Should -Be $true
         ($names -contains "PINECONE_API_KEY") | Should -Be $true
         ($names -contains "SUPABASE_ACCESS_TOKEN") | Should -Be $true
         ($names -contains "VERCEL_TOKEN") | Should -Be $true
