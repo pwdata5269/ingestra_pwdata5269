@@ -22,6 +22,15 @@ Human bootstrap should establish only the trust and access prerequisites:
 
 Project-level resources belong to automation wherever feasible.
 
+All automation steps should be idempotent.
+
+For this repo, idempotent means:
+
+- do not create duplicate resources when the intended resource already exists
+- repair or reconcile missing required configuration on existing resources
+- produce fresh transient values when required and not recoverable, for example a newly created client secret
+- allow reruns to converge on the intended end state
+
 For this repo, that means automation should own creation or confirmation of:
 
 - the `Supabase` project
@@ -93,6 +102,8 @@ Current repo entry points:
 
 - `validate.yml`
 - `provision-test.yml`
+- `scripts/providers/Azure.ps1`
+- `scripts/providers/Supabase.ps1`
 - `scripts/Test-BootstrapPrereqs.ps1`
 - `scripts/providers/Pinecone.ps1`
 - `scripts/Invoke-IngestraSmokeTests.ps1`
@@ -129,16 +140,28 @@ Automation should:
 - create or update the Azure app registration used for `Supabase` login
 - apply the correct redirect URI only after the `Supabase` project ref exists
 - keep the Azure sign-in app registration minimal for login use
+- ensure a usable client secret is available for the current automation run
 - support later cleanup or reduction of bootstrap-only elevated permissions
+
+Current proven result:
+
+- `EnsureSupabaseLoginApp` has successfully created or updated the Azure sign-in app in `GitHub Actions`
+- reruns now create a fresh usable client secret for the current run
 
 ### Supabase
 
 Automation should:
 
 - create the target project
+- preserve idempotent behavior through `EnsureProject`
 - expose the resulting project ref needed by the Azure redirect URI
 - later apply post-create configuration
 - later apply schema, auth, and environment-related setup
+
+Current proven result:
+
+- `EnsureProject` has successfully created the configured `Supabase` project in `GitHub Actions`
+- current project ref: `xshawwxhqjjbemptekjk`
 
 ### Vercel
 
@@ -166,15 +189,15 @@ Automation is in the intended state when:
 - human bootstrap is limited to org/account/token/access setup
 - project-level resources are created by scripts or CI
 - automation behavior is driven by declared secrets and JSON config
-- reruns are safe or intentionally bounded
+- reruns are idempotent and converge on the intended state
 - failures are specific and actionable
 
 ## Known Gaps
 
 Current gaps:
 
-- Azure app-registration automation for `Supabase` login is not yet implemented
-- `Supabase` project automation is not complete
+- `Supabase` auth is not yet configured to consume the Azure sign-in app automatically
+- `Supabase` post-create configuration is not yet implemented
 - `Vercel` project automation is not implemented
 - the current `Pinecone` script does not yet consume the JSON config file
 - integrated-embedding `Pinecone` index creation is not yet scripted

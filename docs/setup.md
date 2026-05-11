@@ -17,6 +17,8 @@ Manual bootstrap covers the first trust-establishing steps that cannot safely st
 
 Repo automation covers repeatable validation, provisioning, and testing after those prerequisites exist.
 
+Repo-owned automation is expected to be idempotent so repeated runs do not create duplicate resources and can safely converge on the intended state.
+
 ## Manual Bootstrap
 
 These steps are intentionally manual because automation cannot safely begin before credentials or tenancy exist:
@@ -38,6 +40,8 @@ Use the dedicated human runbook for the ordered checklist:
 The repo currently automates or validates these areas:
 
 - secret contract validation
+- `Supabase` project creation
+- Azure app-registration creation or update for `Supabase` login
 - `Pester` test execution in CI
 - `Pinecone` index creation, confirmation, and deletion
 - basic smoke-test execution against configured HTTP endpoints

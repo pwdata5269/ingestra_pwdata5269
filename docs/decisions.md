@@ -55,3 +55,36 @@
   - the human bootstrap layer records and stores the Azure bootstrap identity only
   - automation must create the Supabase project before completing the Azure sign-in app registration
   - bootstrap-only elevated Azure permissions should be reduced or removed after use
+
+### Supabase As First Proven Automation Step
+
+- date: 2026-05-11
+- status: implemented
+- choice: make `Supabase` project provisioning the first external provider step exercised through `GitHub Actions`
+- rationale: `Supabase` project creation is upstream of the Azure OAuth redirect dependency and provides a clean first proof that secret-backed provider automation works end to end
+- consequences:
+  - `provision-test.yml` now runs `Supabase` `EnsureProject` before `Pinecone`
+  - the current configured `Supabase` project has been created successfully through automation
+  - follow-on work should focus on Azure app-registration automation and `Supabase` post-create configuration
+
+### Idempotent Automation Requirement
+
+- date: 2026-05-11
+- status: decided
+- choice: require all provider automation steps to be idempotent
+- rationale: the repo is intended to be rerun safely in CI and by maintainers without duplicating resources or depending on one-time transient state
+- consequences:
+  - provider scripts should prefer `Ensure*` behavior over one-shot create semantics
+  - existing resources must be reconciled to the intended state where feasible
+  - automation should regenerate transient values when needed for the current run rather than assuming earlier run outputs still exist
+
+### Azure Login App Automation Proven
+
+- date: 2026-05-11
+- status: implemented
+- choice: automate Azure `Supabase` login app creation and rerun-safe client-secret generation inside the provisioning workflow
+- rationale: the Azure sign-in app is part of the provider automation boundary, and the workflow needs a usable client secret on every relevant run
+- consequences:
+  - `provision-test.yml` now proves the Azure login app step in `GitHub Actions`
+  - the Azure step now emits a fresh client secret for the current run even when the app already exists
+  - the next integration target is applying those Azure values into `Supabase` auth configuration
