@@ -9,8 +9,10 @@ This repo owns the automation workflow around the `Ingestra` platform.
 ### Validate
 
 - run `Pester`
+- use `Pester 5` syntax in repo tests because CI installs a current `Pester` release
 - validate secret-name contracts
 - fail before any external mutation if the bootstrap contract is incomplete
+- run automatically on pushes to `main` or `master`, and on pull requests
 
 ### Provision
 

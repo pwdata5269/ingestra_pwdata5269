@@ -13,6 +13,7 @@
 - explicit missing-secret reporting
 - provisioning step logs for `Pinecone`
 - smoke-test pass/fail output for configured endpoints
+- workflow failures should distinguish test-syntax issues from real infrastructure or secret failures
 
 ## Reporting Pattern
 

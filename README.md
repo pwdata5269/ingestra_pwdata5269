@@ -54,6 +54,7 @@ Everything after that should be scriptable and CI-driven.
 
 - `validate.yml`
   - lints the automation contract through `Pester`
+  - runs on pushes to `main` and `master`, and on pull requests
   - validates required secret names for selected modes
 
 - `provision-test.yml`
