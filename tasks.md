@@ -16,6 +16,9 @@
 - add environment-specific config templates
 - add end-to-end test fixtures for upload, retrieval, and chat
 - decide whether parser-service validation runs in CI or only in a gated environment
+- promote the current setup/bootstrap guidance into dedicated runbooks once the flow stabilizes:
+  - `Human Bootstrap Runbook`
+  - `Automation Operations Runbook`
 
 ## Deliverables
 

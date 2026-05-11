@@ -33,3 +33,13 @@
 - choice: accept one-time manual bootstrap for provider/org creation and token issuance, then automate the rest
 - rationale: this is the honest boundary for systems that require an authenticated tenancy before API use
 - consequences: setup docs must distinguish clearly between one-time manual steps and repeatable repo-owned automation
+
+### Future Runbook Split
+
+- date: 2026-05-11
+- status: decided
+- choice: when the setup and automation flows stabilize, split the current guidance into two dedicated runbooks
+- rationale: one-time human bootstrap and repeatable automation/operations are different concerns and should not stay mixed indefinitely
+- consequences: later documentation work should produce:
+  - `Human Bootstrap Runbook`
+  - `Automation Operations Runbook`
