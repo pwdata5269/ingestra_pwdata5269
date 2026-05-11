@@ -37,9 +37,12 @@
 ### Future Runbook Split
 
 - date: 2026-05-11
-- status: decided
-- choice: when the setup and automation flows stabilize, split the current guidance into two dedicated runbooks
+- status: implemented
+- choice: split setup guidance into dedicated runbooks, with the human bootstrap flow extracted first
 - rationale: one-time human bootstrap and repeatable automation/operations are different concerns and should not stay mixed indefinitely
-- consequences: later documentation work should produce:
+- consequences:
+  - the ordered manual setup checklist now lives in `docs/human-bootstrap-runbook.md`
+  - `docs/setup.md` now serves as a boundary/orientation document instead of carrying the full manual checklist
+  - later documentation work should still produce:
   - `Human Bootstrap Runbook`
   - `Automation Operations Runbook`

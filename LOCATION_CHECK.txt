@@ -1,0 +1,5 @@
+Active working repository:
+C:\Projects\ingestra_pwdata5269
+
+Purpose:
+This file was created to confirm the current working location for this session.
