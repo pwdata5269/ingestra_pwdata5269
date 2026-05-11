@@ -84,7 +84,12 @@ function Get-SupabaseProjectByName {
     )
 
     $projects = Invoke-IngestraApiRequest -Method GET -Uri "$baseUri/projects" -Headers $headers
-    return @($projects | Where-Object { $_.name -eq $Name } | Select-Object -First 1)[0]
+    $match = @($projects | Where-Object { $_.name -eq $Name } | Select-Object -First 1)
+    if ($match.Count -eq 0) {
+        return $null
+    }
+
+    return $match[0]
 }
 
 switch ($Action) {

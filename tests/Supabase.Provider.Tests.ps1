@@ -14,4 +14,11 @@ Describe "Supabase provider script" {
 
         $scriptContent | Should -Match '"EnsureProject"'
     }
+
+    It "returns null safely when no existing project matches" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Supabase.ps1" -Raw
+
+        $scriptContent | Should -Match '\$match.Count -eq 0'
+        $scriptContent | Should -Match 'return \$null'
+    }
 }
