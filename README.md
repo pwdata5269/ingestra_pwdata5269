@@ -54,7 +54,7 @@ Everything after that should be scriptable and CI-driven.
 
 - `validate.yml`
   - lints the automation contract through `Pester`
-  - runs on pushes to `main` and `master`, and on pull requests
+  - runs manually, on pushes to `main` and `master`, and on pull requests
   - validates required secret names for selected modes
   - publishes one dated XML and one dated HTML test report per workflow run
 
