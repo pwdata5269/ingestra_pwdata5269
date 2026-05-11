@@ -33,3 +33,12 @@ Describe "Test-IngestraSecretsPresent" {
         ($result.Present -contains "INGESTRA_TEST_PRESENT") | Should -Be $true
     }
 }
+
+Describe "Get-IngestraAutomationConfigSection" {
+    It "loads the supabase config section from the default automation config" {
+        $section = Get-IngestraAutomationConfigSection -SectionName supabase
+
+        $section.projectName | Should -Be "ingestra-ci"
+        $section.region | Should -Be "eu-west-1"
+    }
+}

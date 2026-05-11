@@ -26,6 +26,7 @@ These steps are intentionally manual because automation cannot safely begin befo
 - create or confirm the base `Vercel` account/team
 - create a `Vercel` token with project-management rights
 - create or confirm the base `Pinecone` account and API key
+- create or confirm the Azure bootstrap app registration and required bootstrap permissions
 - store the resulting values in `GitHub Actions` secrets
 
 Use the dedicated human runbook for the ordered checklist:
@@ -52,6 +53,9 @@ The repo does not yet fully automate:
 
 Current repo-owned automation expects these secrets when relevant:
 
+- `AZURE_TENANT_ID`
+- `AZURE_CLIENT_ID`
+- `AZURE_CLIENT_SECRET`
 - `SUPABASE_ACCESS_TOKEN`
 - `SUPABASE_ORG_SLUG`
 - `SUPABASE_DB_PASSWORD`
@@ -81,7 +85,7 @@ To create or confirm the default index locally:
 pwsh -File .\scripts\providers\Pinecone.ps1 `
   -Action EnsureIndex `
   -IndexName ingestra-ci `
-  -Dimension 384 `
+  -Dimension 1024 `
   -Metric cosine `
   -Cloud aws `
   -Region us-east-1

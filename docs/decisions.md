@@ -43,6 +43,15 @@
 - consequences:
   - the ordered manual setup checklist now lives in `docs/human-bootstrap-runbook.md`
   - `docs/setup.md` now serves as a boundary/orientation document instead of carrying the full manual checklist
-  - later documentation work should still produce:
-  - `Human Bootstrap Runbook`
-  - `Automation Operations Runbook`
+  - the automation operations guidance now lives in `docs/automation-operations-runbook.md`
+
+### Azure Bootstrap Identity Boundary
+
+- date: 2026-05-11
+- status: decided
+- choice: use a bootstrap Azure app registration with temporary elevated permissions for Azure app-registration automation, and keep the Supabase sign-in app registration as an automation-created resource after the Supabase project exists
+- rationale: the Supabase OAuth redirect URI depends on the Supabase project ref, so the Azure sign-in app registration cannot be finalized during early manual bootstrap
+- consequences:
+  - the human bootstrap layer records and stores the Azure bootstrap identity only
+  - automation must create the Supabase project before completing the Azure sign-in app registration
+  - bootstrap-only elevated Azure permissions should be reduced or removed after use

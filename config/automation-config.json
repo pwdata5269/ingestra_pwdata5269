@@ -1,0 +1,33 @@
+{
+  "supabase": {
+    "createProject": true,
+    "projectName": "ingestra-ci",
+    "region": "eu-west-1",
+    "postCreateConfigurationEnabled": false
+  },
+  "vercel": {
+    "createProject": true,
+    "projectName": "ingestra-ci",
+    "scopeType": "personal",
+    "teamId": "",
+    "environmentVariableWiringEnabled": false
+  },
+  "pinecone": {
+    "createIndex": true,
+    "indexName": "ingestra-ci",
+    "metric": "cosine",
+    "dimension": 1024,
+    "embeddingMode": "integrated",
+    "embeddingModel": "llama-text-embed-v2",
+    "fieldMap": {
+      "text": "chunk_text"
+    },
+    "cloud": "aws",
+    "region": "us-east-1"
+  },
+  "n8n": {
+    "enabled": false,
+    "deploymentMode": "",
+    "baseUrl": ""
+  }
+}

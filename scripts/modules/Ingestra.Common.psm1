@@ -1,5 +1,8 @@
 Set-StrictMode -Version Latest
 
+$script:IngestraRepoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
+$script:DefaultAutomationConfigPath = Join-Path $script:IngestraRepoRoot "config\automation-config.json"
+
 function Get-IngestraRequiredSecretNames {
     [CmdletBinding()]
     param(
@@ -89,6 +92,44 @@ function Invoke-IngestraApiRequest {
     Invoke-RestMethod @params
 }
 
+function Get-IngestraAutomationConfig {
+    [CmdletBinding()]
+    param(
+        [Parameter()]
+        [string]$Path = $script:DefaultAutomationConfigPath
+    )
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        throw "Automation config file not found: $Path"
+    }
+
+    $raw = Get-Content -LiteralPath $Path -Raw
+    if ([string]::IsNullOrWhiteSpace($raw)) {
+        throw "Automation config file is empty: $Path"
+    }
+
+    return ($raw | ConvertFrom-Json -Depth 20)
+}
+
+function Get-IngestraAutomationConfigSection {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$SectionName,
+
+        [Parameter()]
+        [string]$Path = $script:DefaultAutomationConfigPath
+    )
+
+    $config = Get-IngestraAutomationConfig -Path $Path
+    $section = $config.PSObject.Properties[$SectionName]
+    if ($null -eq $section) {
+        throw "Automation config section '$SectionName' was not found in $Path"
+    }
+
+    return $section.Value
+}
+
 function Write-IngestraSummary {
     [CmdletBinding()]
     param(
@@ -107,4 +148,6 @@ function Write-IngestraSummary {
 Export-ModuleMember -Function Get-IngestraRequiredSecretNames
 Export-ModuleMember -Function Test-IngestraSecretsPresent
 Export-ModuleMember -Function Invoke-IngestraApiRequest
+Export-ModuleMember -Function Get-IngestraAutomationConfig
+Export-ModuleMember -Function Get-IngestraAutomationConfigSection
 Export-ModuleMember -Function Write-IngestraSummary

@@ -18,8 +18,11 @@ This repo owns the automation workflow around the `Ingestra` platform.
 
 ### Provision
 
+- create the `Supabase` project
+- capture the resulting `Supabase` project ref
+- create or update the Azure app registration for `Supabase` login
 - create or confirm the vector index in `Pinecone`
-- later: create/configure the `Supabase` and `Vercel` projects
+- create or confirm the `Vercel` project
 - later: apply schema and environment settings
 
 ### Test

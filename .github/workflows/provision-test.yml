@@ -10,7 +10,7 @@ on:
       pinecone_dimension:
         description: Embedding dimension
         required: true
-        default: "384"
+        default: "1024"
       run_smoke_tests:
         description: Run smoke tests after provisioning
         required: true
@@ -39,6 +39,13 @@ jobs:
         shell: pwsh
         run: |
           .\scripts\Test-BootstrapPrereqs.ps1 -Profile provision
+
+      - name: Ensure Supabase project
+        shell: pwsh
+        run: |
+          .\scripts\providers\Supabase.ps1 `
+            -Action EnsureProject `
+            -ConfigPath .\config\automation-config.json
 
       - name: Ensure Pinecone index
         shell: pwsh
