@@ -114,6 +114,38 @@ function Invoke-GraphApiRequest {
     Invoke-RestMethod @params
 }
 
+function Invoke-WithRetry {
+    param(
+        [Parameter(Mandatory)]
+        [scriptblock]$ScriptBlock,
+
+        [Parameter()]
+        [int]$MaxAttempts = 5,
+
+        [Parameter()]
+        [int]$InitialDelaySeconds = 2
+    )
+
+    $attempt = 1
+    $delaySeconds = $InitialDelaySeconds
+
+    while ($true) {
+        try {
+            return & $ScriptBlock
+        }
+        catch {
+            if ($attempt -ge $MaxAttempts) {
+                throw
+            }
+
+            Write-Host ("Retrying after transient failure. Attempt {0} of {1}." -f $attempt, $MaxAttempts)
+            Start-Sleep -Seconds $delaySeconds
+            $attempt++
+            $delaySeconds = [Math]::Min(($delaySeconds * 2), 15)
+        }
+    }
+}
+
 function Get-SupabaseProjectByName {
     param(
         [Parameter(Mandatory)]
@@ -258,9 +290,11 @@ switch ($Action) {
         }
 
         $created = Invoke-GraphApiRequest -Method POST -Uri "$graphBaseUri/applications" -Body $createBody
-        $passwordResult = Invoke-GraphApiRequest -Method POST -Uri "$graphBaseUri/applications/$($created.id)/addPassword" -Body @{
-            passwordCredential = @{
-                displayName = "$displayName bootstrap secret"
+        $passwordResult = Invoke-WithRetry -ScriptBlock {
+            Invoke-GraphApiRequest -Method POST -Uri "$graphBaseUri/applications/$($created.id)/addPassword" -Body @{
+                passwordCredential = @{
+                    displayName = "$displayName bootstrap secret"
+                }
             }
         }
 
