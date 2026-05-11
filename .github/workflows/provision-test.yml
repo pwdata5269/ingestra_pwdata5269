@@ -44,6 +44,7 @@ jobs:
           .\scripts\Test-BootstrapPrereqs.ps1 -Profile provision
 
       - name: Ensure Supabase project
+        id: ensure_supabase
         shell: pwsh
         run: |
           .\scripts\providers\Supabase.ps1 `
@@ -51,10 +52,21 @@ jobs:
             -ConfigPath .\config\automation-config.json
 
       - name: Ensure Azure Supabase login app
+        id: ensure_azure_login_app
         shell: pwsh
         run: |
           .\scripts\providers\Azure.ps1 `
             -Action EnsureSupabaseLoginApp `
+            -ConfigPath .\config\automation-config.json
+
+      - name: Ensure Supabase Azure auth config
+        shell: pwsh
+        run: |
+          .\scripts\providers\Supabase.ps1 `
+            -Action EnsureAzureAuthConfig `
+            -ProjectRef "${{ steps.ensure_supabase.outputs.supabase_project_ref }}" `
+            -AzureClientId "${{ steps.ensure_azure_login_app.outputs.supabase_login_app_id }}" `
+            -AzureClientSecret "${{ steps.ensure_azure_login_app.outputs.supabase_login_client_secret }}" `
             -ConfigPath .\config\automation-config.json
 
       - name: Ensure Pinecone index

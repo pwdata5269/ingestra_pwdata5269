@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidateSet("ListOrganizations", "ListProjects", "CreateProject", "EnsureProject")]
+    [ValidateSet("ListOrganizations", "ListProjects", "CreateProject", "EnsureProject", "EnsureAzureAuthConfig")]
     [string]$Action,
 
     [Parameter()]
@@ -9,6 +9,15 @@ param(
 
     [Parameter()]
     [string]$Region,
+
+    [Parameter()]
+    [string]$ProjectRef,
+
+    [Parameter()]
+    [string]$AzureClientId,
+
+    [Parameter()]
+    [string]$AzureClientSecret,
 
     [Parameter()]
     [string]$ConfigPath
@@ -92,6 +101,20 @@ function Get-SupabaseProjectByName {
     return $match[0]
 }
 
+function Resolve-SupabaseProjectRef {
+    if (-not [string]::IsNullOrWhiteSpace($ProjectRef)) {
+        return $ProjectRef
+    }
+
+    $resolved = Resolve-SupabaseProjectInputs
+    $project = Get-SupabaseProjectByName -Name $resolved.ProjectName
+    if ($null -eq $project) {
+        throw "Supabase project '$($resolved.ProjectName)' was not found."
+    }
+
+    return [string]$project.ref
+}
+
 switch ($Action) {
     "ListOrganizations" {
         $organizations = Invoke-IngestraApiRequest -Method GET -Uri "$baseUri/organizations" -Headers $headers
@@ -137,6 +160,7 @@ switch ($Action) {
         }
 
         $createdProject = Invoke-IngestraApiRequest -Method POST -Uri "$baseUri/projects" -Headers $headers -Body $body
+        Set-IngestraOutput -Name "supabase_project_ref" -Value ([string]$createdProject.ref)
         Write-IngestraSummary -Lines @(
             "## Supabase",
             "- Action: create project",
@@ -155,6 +179,7 @@ switch ($Action) {
 
         if ($null -ne $existing) {
             Write-Host "Supabase project '$($resolved.ProjectName)' already exists."
+            Set-IngestraOutput -Name "supabase_project_ref" -Value ([string]$existing.ref)
             Write-IngestraSummary -Lines @(
                 "## Supabase",
                 "- Action: ensure project",
@@ -186,6 +211,7 @@ switch ($Action) {
         }
 
         $createdProject = Invoke-IngestraApiRequest -Method POST -Uri "$baseUri/projects" -Headers $headers -Body $body
+        Set-IngestraOutput -Name "supabase_project_ref" -Value ([string]$createdProject.ref)
         Write-IngestraSummary -Lines @(
             "## Supabase",
             "- Action: ensure project",
@@ -195,6 +221,44 @@ switch ($Action) {
             ("- Project ref: {0}" -f $createdProject.ref)
         )
         $createdProject | ConvertTo-Json -Depth 10
+        break
+    }
+
+    "EnsureAzureAuthConfig" {
+        $resolvedProjectRef = Resolve-SupabaseProjectRef
+
+        if ([string]::IsNullOrWhiteSpace($AzureClientId)) {
+            throw "AzureClientId is required for EnsureAzureAuthConfig."
+        }
+
+        if ([string]::IsNullOrWhiteSpace($AzureClientSecret)) {
+            throw "AzureClientSecret is required for EnsureAzureAuthConfig."
+        }
+
+        $tenantId = [Environment]::GetEnvironmentVariable("AZURE_TENANT_ID")
+        if ([string]::IsNullOrWhiteSpace($tenantId)) {
+            throw "AZURE_TENANT_ID is required."
+        }
+
+        $azureUrl = "https://login.microsoftonline.com/$tenantId"
+        $body = @{
+            external_azure_enabled   = $true
+            external_azure_client_id = $AzureClientId
+            external_azure_secret    = $AzureClientSecret
+            external_azure_url       = $azureUrl
+        }
+
+        $configured = Invoke-IngestraApiRequest -Method PATCH -Uri "$baseUri/projects/$resolvedProjectRef/config/auth" -Headers $headers -Body $body
+        Write-IngestraSummary -Lines @(
+            "## Supabase Auth",
+            "- Action: ensure Azure auth config",
+            "- Result: configured",
+            ("- Project ref: {0}" -f $resolvedProjectRef),
+            ("- Azure client ID: {0}" -f $AzureClientId),
+            ("- Azure URL: {0}" -f $azureUrl)
+        )
+        Set-IngestraOutput -Name "supabase_project_ref" -Value $resolvedProjectRef
+        $configured | ConvertTo-Json -Depth 10
         break
     }
 }
