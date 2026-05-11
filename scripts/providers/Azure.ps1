@@ -219,6 +219,24 @@ function New-OptionalClaimObject {
     }
 }
 
+function New-AzureApplicationPassword {
+    param(
+        [Parameter(Mandatory)]
+        [string]$ApplicationObjectId,
+
+        [Parameter(Mandatory)]
+        [string]$DisplayName
+    )
+
+    return Invoke-WithRetry -ScriptBlock {
+        Invoke-GraphApiRequest -Method POST -Uri "$graphBaseUri/applications/$ApplicationObjectId/addPassword" -Body @{
+            passwordCredential = @{
+                displayName = "$DisplayName bootstrap secret"
+            }
+        }
+    }
+}
+
 switch ($Action) {
     "EnsureSupabaseLoginApp" {
         $createEnabled = [bool](Get-AzureConfigValue -PropertyName "createSupabaseLoginApp")
@@ -256,6 +274,9 @@ switch ($Action) {
             }
 
             Invoke-GraphApiRequest -Method PATCH -Uri "$graphBaseUri/applications/$($existing.id)" -Body $patchBody | Out-Null
+            $passwordResult = New-AzureApplicationPassword -ApplicationObjectId ([string]$existing.id) -DisplayName $displayName
+            $secretText = [string]$passwordResult.secretText
+            Add-IngestraMask -Value $secretText
             Write-IngestraSummary -Lines @(
                 "## Azure",
                 "- Action: ensure Supabase login app",
@@ -265,6 +286,7 @@ switch ($Action) {
                 ("- Redirect URI: {0}" -f $redirectUri)
             )
             Set-IngestraOutput -Name "supabase_login_app_id" -Value ([string]$existing.appId)
+            Set-IngestraOutput -Name "supabase_login_client_secret" -Value $secretText
             Set-IngestraOutput -Name "supabase_login_redirect_uri" -Value $redirectUri
             [pscustomobject]@{
                 Result = "already_exists"
@@ -290,14 +312,7 @@ switch ($Action) {
         }
 
         $created = Invoke-GraphApiRequest -Method POST -Uri "$graphBaseUri/applications" -Body $createBody
-        $passwordResult = Invoke-WithRetry -ScriptBlock {
-            Invoke-GraphApiRequest -Method POST -Uri "$graphBaseUri/applications/$($created.id)/addPassword" -Body @{
-                passwordCredential = @{
-                    displayName = "$displayName bootstrap secret"
-                }
-            }
-        }
-
+        $passwordResult = New-AzureApplicationPassword -ApplicationObjectId ([string]$created.id) -DisplayName $displayName
         $secretText = [string]$passwordResult.secretText
         Add-IngestraMask -Value $secretText
         Set-IngestraOutput -Name "supabase_login_app_id" -Value ([string]$created.appId)
