@@ -14,9 +14,11 @@
 - provisioning step logs for `Pinecone`
 - smoke-test pass/fail output for configured endpoints
 - workflow failures should distinguish test-syntax issues from real infrastructure or secret failures
+- upload dated XML and HTML test reports as workflow artifacts
 
 ## Reporting Pattern
 
 - local scripts write concise console output
 - CI jobs append high-signal summaries to `GITHUB_STEP_SUMMARY` when available
 - future integration tests should publish artifacts for request/response evidence
+- current validation workflow publishes one HTML report per invocation with per-test rows and timestamps

@@ -13,6 +13,8 @@ This repo owns the automation workflow around the `Ingestra` platform.
 - validate secret-name contracts
 - fail before any external mutation if the bootstrap contract is incomplete
 - run automatically on pushes to `main` or `master`, and on pull requests
+- emit one dated `JUnit` XML file and one dated HTML report for each workflow invocation
+- keep per-test detail inside the invocation report rather than creating a separate HTML file per test
 
 ### Provision
 
