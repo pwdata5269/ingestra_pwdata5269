@@ -82,8 +82,9 @@ Describe "Supabase provider script" {
         $scriptContent | Should -Match '"-v" "ON_ERROR_STOP=1"'
         $scriptContent | Should -Match 'foreach \(\$migrationFile in \$migrationFiles\)'
         $scriptContent | Should -Match 'SUPABASE_DB_URL is required for EnsureSchema'
-        $scriptContent | Should -Match '\[PASSWORD\]'
-        $scriptContent | Should -Match 'SUPABASE_DB_PASSWORD is required when SUPABASE_DB_URL contains \[PASSWORD\]'
+        $scriptContent | Should -Match '\[YOUR-PASSWORD\]'
+        $scriptContent | Should -Match 'SUPABASE_DB_PASSWORD is required when SUPABASE_DB_URL contains a password placeholder'
+        $scriptContent | Should -Match '\[YOUR-PASSWORD\]'
         $scriptContent | Should -Match 'EscapeDataString'
         $scriptContent | Should -Match 'RLS: enabled in checked-in migrations'
     }
