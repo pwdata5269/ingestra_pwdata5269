@@ -197,6 +197,7 @@ Current proven result:
 - `EnsureProjectLink` has successfully linked the configured GitHub repository and production branch in `GitHub Actions`
 - the minimal static auth harness has deployed successfully to `Vercel`
 - Azure login through `Supabase` is manually proven through the deployed `Vercel` auth harness
+- repeated visits to the harness may silently restore the existing session instead of forcing a fresh Azure prompt
 
 ### Pinecone
 
@@ -225,11 +226,28 @@ Current gaps:
 
 - `Supabase` post-create configuration is not yet implemented
 - `Vercel` GitHub repository authorization remains a one-time manual prerequisite
-- the final `GitHub Actions` rerun still needs to prove the post-deploy output parsing fix end to end
 - the current `Pinecone` script does not yet consume the JSON config file
 - integrated-embedding `Pinecone` index creation is not yet scripted
 - `n8n` automation is not yet implemented
 - full end-to-end upload, retrieval, and chat fixtures are not yet implemented
+
+## Auth Harness Notes
+
+Expected browser behavior for the current `Vercel` auth harness:
+
+- if a valid `Supabase` session already exists in the browser, the page may restore it immediately without redirecting to Azure
+- if the local `Supabase` session has been cleared but the browser still has an active Azure session, a new sign-in attempt may complete silently through Azure SSO
+- use the harness `Sign out` action to clear the local `Supabase` session
+- if a true reauthentication prompt is required, additional OAuth prompt parameters or full Microsoft session logout should be added deliberately rather than assumed by default
+
+Security note:
+
+- silent sign-in is expected SSO behavior, not by itself a defect
+- local `Supabase` session persistence and upstream Azure/Microsoft SSO persistence are separate layers
+- if stricter behavior is required, treat it as an explicit policy choice:
+  - shorten session lifetime
+  - require reauthentication for sensitive actions
+  - add a test or admin mode that requests `prompt=login` or `prompt=select_account`
 
 ## Change Control
 

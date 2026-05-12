@@ -16,7 +16,6 @@
 ## Next Tasks
 
 - implement `Supabase` post-create configuration steps
-- rerun `provision-test` to verify the final Vercel deployment-output parsing fix in `GitHub Actions`
 - define the `n8n` deployment model for CI-compatible validation
 - add environment-specific config templates
 - add end-to-end test fixtures for upload, retrieval, and chat
@@ -39,7 +38,7 @@
 - the repo can configure `Supabase` to use Azure login successfully
 - the repo can create a `Vercel` project and, once `Vercel` has been granted access to the repository, ensure repository linkage successfully
 - the repo can generate a static frontend runtime config and deploy the frontend to `Vercel` from `GitHub Actions`
-- the repo can prove Azure login end to end through the deployed `Vercel` auth harness, and the final workflow rerun should complete without output-format errors
+- the repo can prove Azure login end to end through the deployed `Vercel` auth harness
 - the repo can create or reset a test `Pinecone` index from CI inputs
 - smoke tests can fail fast with actionable output
 - future `Qdrant` support can be added without reworking the entire repo shape
