@@ -15,6 +15,12 @@ Describe "Supabase provider script" {
         $scriptContent | Should -Match '"EnsureProject"'
     }
 
+    It "accepts EnsureSchema as a supported action" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Supabase.ps1" -Raw
+
+        $scriptContent | Should -Match '"EnsureSchema"'
+    }
+
     It "accepts EnsureAzureAuthConfig as a supported action" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Supabase.ps1" -Raw
 
@@ -63,5 +69,14 @@ Describe "Supabase provider script" {
 
         $scriptContent | Should -Match '/api-keys\?reveal=true'
         $scriptContent | Should -Match 'supabase_public_key'
+    }
+
+    It "applies checked-in Supabase migrations through the Supabase CLI" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Supabase.ps1" -Raw
+
+        $scriptContent | Should -Match 'supabase\\migrations'
+        $scriptContent | Should -Match 'supabase@latest'
+        $scriptContent | Should -Match '"db", "push", "--db-url"'
+        $scriptContent | Should -Match 'RLS: enabled in checked-in migrations'
     }
 }

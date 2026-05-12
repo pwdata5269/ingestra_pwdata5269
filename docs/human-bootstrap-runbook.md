@@ -63,13 +63,15 @@ At the end of this phase, you should have:
 Do this:
 
 1. Confirm the target repository exists under the intended owner.
-2. Confirm the default branch name, expected to be `main`.
-3. Confirm `GitHub Actions` is enabled for the repository.
-4. Confirm you can push to the repository from the operator machine.
+2. For the current `Vercel Hobby` deployment model, confirm the repository is `public`.
+3. Confirm the default branch name, expected to be `main`.
+4. Confirm `GitHub Actions` is enabled for the repository.
+5. Confirm you can push to the repository from the operator machine.
 
 Acceptance criteria:
 
 - the repository exists
+- the repository visibility is confirmed as `public` for the current `Vercel Hobby` setup
 - the default branch is known
 - the `Actions` tab is enabled
 - you can push successfully from the operator machine
@@ -221,6 +223,7 @@ Acceptance criteria:
 Phase 1 is complete when all of the following are true:
 
 - the repository exists and `GitHub Actions` is enabled
+- the repository visibility is confirmed as `public` for the current `Vercel Hobby` setup
 - the Azure bootstrap values are available
 - the `Supabase` organization exists and management token exists
 - the `Vercel` account or team exists and the token exists
@@ -278,6 +281,7 @@ Acceptance criteria:
 Human bootstrap is complete when all of the following are true:
 
 - the repository exists and `GitHub Actions` is enabled
+- the repository visibility is confirmed as `public` for the current `Vercel Hobby` setup
 - the Azure bootstrap values are available
 - the `Supabase` organization exists and management token exists
 - the `Vercel` account or team exists and the token exists

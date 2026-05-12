@@ -116,6 +116,10 @@ Later provider entry points should be added for:
 - `Vercel` project creation, repo linkage, deployment protection, and CI-driven deployment
 - `n8n` deployment validation
 
+Current checked-in schema source for later `Supabase` post-create automation:
+
+- [20260512213000_initial_ingestra_tables.sql](/C:/Projects/ingestra_pwdata5269/supabase/migrations/20260512213000_initial_ingestra_tables.sql)
+
 ## Execution Flow
 
 The intended automation flow is:
@@ -171,6 +175,12 @@ Automation should:
 - preserve idempotent behavior through `EnsureProject`
 - expose the resulting project ref needed by the Azure redirect URI
 - configure Azure auth to use the generated Azure sign-in app
+- apply checked-in SQL schema files for post-create configuration
+- create the initial internal tables:
+  - `pinecone_records`
+  - `retrieval_result_logs`
+- enable RLS on those tables as part of the initial schema
+- avoid broad `anon` read policies by default and rely on backend or service-role access unless stricter client access rules are intentionally added later
 - later apply remaining post-create configuration
 - later apply schema, auth, and environment-related setup
 
@@ -179,6 +189,33 @@ Current proven result:
 - `EnsureProject` has successfully created the configured `Supabase` project in `GitHub Actions`
 - current project ref: `xshawwxhqjjbemptekjk`
 - Azure login is now visibly enabled in the live `Supabase` project
+
+Current declared next schema target:
+
+- [20260512213000_initial_ingestra_tables.sql](/C:/Projects/ingestra_pwdata5269/supabase/migrations/20260512213000_initial_ingestra_tables.sql)
+- `pinecone_records`
+  - `id`
+  - `document_id`
+  - `document_name`
+  - `document_type`
+  - `collection`
+  - `hash`
+  - `uploaded_by`
+  - `uploaded_at`
+- `retrieval_result_logs`
+  - `id`
+  - `request_id`
+  - `workflow_type`
+  - `query_text`
+  - `provider`
+  - `model`
+  - `collection`
+  - `result_index`
+  - `document_id`
+  - `doc_name`
+  - `page_number`
+  - `score`
+  - `created_at`
 
 ### Vercel
 
@@ -224,7 +261,7 @@ Automation is in the intended state when:
 
 Current gaps:
 
-- `Supabase` post-create configuration is not yet implemented
+- `Supabase` post-create schema application is not yet automated through `PowerShell` and `GitHub Actions`
 - `Vercel` GitHub repository authorization remains a one-time manual prerequisite
 - the current `Pinecone` script does not yet consume the JSON config file
 - integrated-embedding `Pinecone` index creation is not yet scripted

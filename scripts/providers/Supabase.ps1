@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidateSet("ListOrganizations", "ListProjects", "CreateProject", "EnsureProject", "EnsureAzureAuthConfig", "EnsureBrowserAuthConfig", "GetPublicClientConfig")]
+    [ValidateSet("ListOrganizations", "ListProjects", "CreateProject", "EnsureProject", "EnsureSchema", "EnsureAzureAuthConfig", "EnsureBrowserAuthConfig", "GetPublicClientConfig")]
     [string]$Action,
 
     [Parameter()]
@@ -46,6 +46,7 @@ $headers = @{
 }
 
 $baseUri = "https://api.supabase.com/v1"
+$repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
 
 function Get-SupabaseConfigValue {
     param(
@@ -191,6 +192,54 @@ function Resolve-BrowserAuthConfig {
     }
 }
 
+function Get-SupabaseMigrationFilePaths {
+    $migrationsPath = Join-Path $repoRoot "supabase\migrations"
+    if (-not (Test-Path -LiteralPath $migrationsPath)) {
+        throw "Supabase migrations directory not found: $migrationsPath"
+    }
+
+    $files = Get-ChildItem -LiteralPath $migrationsPath -Filter *.sql | Sort-Object Name
+    if (@($files).Count -eq 0) {
+        throw "No Supabase migration files were found in $migrationsPath"
+    }
+
+    return @($files)
+}
+
+function Get-SupabaseDbUrl {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Ref
+    )
+
+    $dbPassword = [Environment]::GetEnvironmentVariable("SUPABASE_DB_PASSWORD")
+    if ([string]::IsNullOrWhiteSpace($dbPassword)) {
+        throw "SUPABASE_DB_PASSWORD is required."
+    }
+
+    $encodedPassword = [System.Uri]::EscapeDataString($dbPassword)
+    return "postgresql://postgres:$encodedPassword@db.$Ref.supabase.co:6543/postgres"
+}
+
+function Invoke-SupabaseCliCommand {
+    param(
+        [Parameter(Mandatory)]
+        [string[]]$Arguments
+    )
+
+    $output = & npx "supabase@latest" @Arguments 2>&1
+    $exitCode = $LASTEXITCODE
+    if ($output) {
+        $output | ForEach-Object { Write-Host $_ }
+    }
+
+    if ($exitCode -ne 0) {
+        throw "Supabase CLI command failed with exit code $exitCode."
+    }
+
+    return ($output | Out-String)
+}
+
 switch ($Action) {
     "ListOrganizations" {
         $organizations = Invoke-IngestraApiRequest -Method GET -Uri "$baseUri/organizations" -Headers $headers
@@ -297,6 +346,31 @@ switch ($Action) {
             ("- Project ref: {0}" -f $createdProject.ref)
         )
         $createdProject | ConvertTo-Json -Depth 10
+        break
+    }
+
+    "EnsureSchema" {
+        $resolvedProjectRef = Resolve-SupabaseProjectRef
+        $dbUrl = Get-SupabaseDbUrl -Ref $resolvedProjectRef
+        $migrationFiles = @(Get-SupabaseMigrationFilePaths)
+
+        Invoke-SupabaseCliCommand -Arguments @("db", "push", "--db-url", $dbUrl, "--include-all")
+
+        Write-IngestraSummary -Lines @(
+            "## Supabase Schema",
+            "- Action: ensure schema",
+            "- Result: applied",
+            ("- Project ref: {0}" -f $resolvedProjectRef),
+            ("- Migration count: {0}" -f $migrationFiles.Count),
+            ("- Schema: public"),
+            "- RLS: enabled in checked-in migrations"
+        )
+        Set-IngestraOutput -Name "supabase_project_ref" -Value $resolvedProjectRef
+        [pscustomobject]@{
+            project_ref     = $resolvedProjectRef
+            migration_count = $migrationFiles.Count
+            schema          = "public"
+        } | ConvertTo-Json -Depth 10
         break
     }
 

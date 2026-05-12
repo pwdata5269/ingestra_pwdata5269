@@ -23,6 +23,7 @@ Repo-owned automation is expected to be idempotent so repeated runs do not creat
 
 These steps are intentionally manual because automation cannot safely begin before credentials or tenancy exist:
 
+- ensure the `GitHub` repository is `public` for the current `Vercel Hobby` deployment model
 - create or confirm the base `Supabase` account/org
 - create a `Supabase` PAT with rights to manage projects
 - create or confirm the base `Vercel` account/team
