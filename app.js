@@ -51,15 +51,14 @@ function showSession(session) {
 async function main() {
   setStatus("Loading", "pill-waiting");
 
-  let config;
-  try {
-    const response = await fetch("/api/config", { cache: "no-store" });
-    config = await response.json();
-    if (!response.ok) {
-      throw new Error(config.error ?? "Unable to load runtime config.");
-    }
-  } catch (error) {
-    showError(error.message);
+  const config = window.INGESTRA_RUNTIME_CONFIG;
+  if (!config?.supabaseUrl || !config?.supabasePublicKey) {
+    showError("SUPABASE_URL and SUPABASE_PUBLIC_KEY must be present in runtime-config.js.");
+    return;
+  }
+
+  if (config.error) {
+    showError(config.error);
     return;
   }
 

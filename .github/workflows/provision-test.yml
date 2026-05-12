@@ -122,15 +122,18 @@ jobs:
             -ProjectRef "${{ steps.ensure_supabase.outputs.supabase_project_ref }}" `
             -ConfigPath .\config\automation-config.json
 
-      - name: Upsert Vercel environment variables
+      - name: Generate frontend runtime config
         shell: pwsh
         env:
           SUPABASE_URL: ${{ steps.resolve_supabase_public_client.outputs.supabase_url }}
           SUPABASE_PUBLIC_KEY: ${{ steps.resolve_supabase_public_client.outputs.supabase_public_key }}
         run: |
-          .\scripts\providers\Vercel.ps1 `
-            -Action UpsertEnvironmentVariables `
-            -ConfigPath .\config\automation-config.json
+          @"
+          window.INGESTRA_RUNTIME_CONFIG = {
+            supabaseUrl: "$env:SUPABASE_URL",
+            supabasePublicKey: "$env:SUPABASE_PUBLIC_KEY"
+          };
+          "@ | Set-Content -LiteralPath .\runtime-config.js -NoNewline
 
       - name: Ensure Vercel deployment protection
         shell: pwsh
