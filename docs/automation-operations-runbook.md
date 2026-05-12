@@ -113,7 +113,7 @@ Current repo entry points:
 Later provider entry points should be added for:
 
 - `Supabase` project creation and post-create configuration
-- `Vercel` project creation, repo linkage, and environment-variable wiring
+- `Vercel` project creation, repo linkage, deployment protection, and CI-driven deployment
 - `n8n` deployment validation
 
 ## Execution Flow
@@ -129,19 +129,21 @@ The intended automation flow is:
 7. create or confirm the `Pinecone` index
 8. create or confirm the `Vercel` project
 9. create or confirm the `Vercel` GitHub repo link and production branch mapping after human bootstrap has granted `Vercel` access to the repository
-10. apply provider-specific settings
-11. run smoke tests when enabled
-12. publish logs, summaries, and test reports
+10. resolve frontend browser URLs and configure `Supabase` browser auth settings
+11. generate the static frontend runtime config consumed by the auth harness
+12. deploy the frontend to `Vercel` from `GitHub Actions`
+13. run smoke tests when enabled
+14. publish logs, summaries, and test reports
 
 ## Near-Term Sequence
 
 Use this order for the next implementation and verification work:
 
 1. implement `Vercel` project automation
-2. ensure the GitHub repository is linked to the `Vercel` project so pushes trigger deployments, assuming `Vercel` has already been granted access to that repository
-3. create a minimal frontend auth test page
-4. link the frontend to `Supabase` auth
-5. run an end-to-end Azure login test
+2. ensure the GitHub repository is linked to the `Vercel` project, assuming `Vercel` has already been granted access to that repository
+3. verify the CI-driven static frontend deployment path on `Vercel`
+4. verify the minimal frontend auth page is reachable
+5. prove Azure login end to end through the deployed harness
 
 ## Provider Intent
 
@@ -185,13 +187,16 @@ Automation should:
 - create the target project
 - ensure the correct GitHub repository is linked to the project after `Vercel` can already see that repository
 - ensure the correct production branch is configured
-- apply project-level configuration
-- later wire required environment variables
+- configure deployment protection so the production auth harness stays reachable while previews remain protected
+- deploy the minimal auth harness from `GitHub Actions`
+- provide runtime configuration to the harness through a generated static `runtime-config.js` file during CI
 
 Current proven result:
 
 - `EnsureProject` has successfully created or confirmed the configured `Vercel` project in `GitHub Actions`
 - `EnsureProjectLink` has successfully linked the configured GitHub repository and production branch in `GitHub Actions`
+- the minimal static auth harness has deployed successfully to `Vercel`
+- Azure login through `Supabase` is manually proven through the deployed `Vercel` auth harness
 
 ### Pinecone
 
@@ -220,7 +225,7 @@ Current gaps:
 
 - `Supabase` post-create configuration is not yet implemented
 - `Vercel` GitHub repository authorization remains a one-time manual prerequisite
-- `Vercel` environment-variable wiring is not yet implemented
+- the final `GitHub Actions` rerun still needs to prove the post-deploy output parsing fix end to end
 - the current `Pinecone` script does not yet consume the JSON config file
 - integrated-embedding `Pinecone` index creation is not yet scripted
 - `n8n` automation is not yet implemented

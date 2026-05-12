@@ -118,6 +118,28 @@
 - choice: prove `Vercel` project creation and repository linkage through `GitHub Actions`, while treating repository authorization as a one-time manual prerequisite
 - rationale: the repo needed a reliable browser-facing deployment target before building the minimal auth test page
 - consequences:
-  - `provision-test.yml` now proves both `EnsureProject` and `EnsureProjectLink`
-  - the next major implementation target is `Vercel` environment-variable wiring
-  - the next major validation target is the minimal frontend auth test page and end-to-end Azure login flow
+- `provision-test.yml` now proves both `EnsureProject` and `EnsureProjectLink`
+- the next major implementation target is `Vercel` environment-variable wiring
+- the next major validation target is the minimal frontend auth test page and end-to-end Azure login flow
+
+### Vercel CI-Driven Static Harness Deployment
+
+- date: 2026-05-12
+- status: decided
+- choice: deploy the minimal `Vercel` auth harness directly from `GitHub Actions` as a static site with a generated `runtime-config.js`, instead of relying on a runtime config API route or Git-triggered private-repo deploys
+- rationale: the `Vercel` `Hobby` plan and private-repository collaboration model introduced friction for Git-triggered deploys, and the runtime API route added unnecessary build/runtime complexity for a static auth harness
+- consequences:
+- the frontend auth harness should stay static-first
+- CI should generate `runtime-config.js` immediately before deploy using resolved `Supabase` public client values
+- `provision-test.yml` should be the canonical path for deploying the auth harness to `Vercel`
+
+### End-To-End Azure Login Proven Through Vercel Harness
+
+- date: 2026-05-12
+- status: decided
+- choice: use the deployed static `Vercel` auth harness as the proof point for browser-based Azure login through `Supabase`
+- rationale: the auth flow is fundamentally browser-based, so the cleanest end-to-end proof is the live deployed harness rather than a backend-only configuration check
+- consequences:
+  - the current `Vercel` auth harness is the canonical verification surface for the identity flow
+  - future auth regressions can be checked quickly against the deployed harness
+  - a clean `GitHub Actions` rerun should still be captured before treating the deploy workflow itself as fully proven

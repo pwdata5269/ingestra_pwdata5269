@@ -45,6 +45,9 @@ The repo currently automates or validates these areas:
 - Azure app-registration creation or update for `Supabase` login
 - `Vercel` project creation
 - `Vercel` GitHub repository linkage after manual repository authorization
+- generation of a static frontend runtime config during CI for the auth harness
+- direct frontend deployment to `Vercel` from `GitHub Actions`
+- browser-based Azure login verification through the deployed auth harness
 - `Pester` test execution in CI
 - `Pinecone` index creation, confirmation, and deletion
 - basic smoke-test execution against configured HTTP endpoints
@@ -53,7 +56,6 @@ The repo does not yet fully automate:
 
 - `Supabase` post-create configuration
 - one-time `Vercel` GitHub repository authorization
-- `Vercel` environment-variable wiring
 - `n8n` deployment and CI-compatible validation
 - full end-to-end upload, retrieval, and chat fixtures
 

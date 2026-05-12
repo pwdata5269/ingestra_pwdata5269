@@ -25,7 +25,11 @@ This repo owns the automation workflow around the `Ingestra` platform.
 - create or confirm the vector index in `Pinecone`
 - create or confirm the `Vercel` project
 - create or confirm the `Vercel` GitHub repository link and production branch mapping after `Vercel` has already been granted access to the repository
-- later: apply schema and environment settings
+- resolve the `Vercel` browser URLs and configure `Supabase` browser auth
+- generate a static `runtime-config.js` file for the minimal auth harness during CI
+- deploy the frontend to `Vercel` directly from `GitHub Actions`
+- verify the deployed harness can complete Azure login through `Supabase`, and ensure the workflow records the deployment URL cleanly
+- later: apply remaining schema and environment settings
 
 ### Test
 
@@ -54,3 +58,4 @@ Preferred pattern:
 - bootstrap the provider account once
 - create environment-specific resources through automation
 - recreate disposable test resources where it is cheap and safe
+- for the minimal `Vercel` auth harness on the `Hobby` plan, prefer CI-driven deployments over relying on Git-triggered private-repo collaborator flows
