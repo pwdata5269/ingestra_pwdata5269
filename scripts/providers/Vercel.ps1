@@ -128,13 +128,16 @@ function Invoke-VercelCliCommand {
     try {
         $output = & npx "vercel@latest" @Arguments 2>&1
         $exitCode = $LASTEXITCODE
+        $outputText = ($output | Out-String)
         if ($output) {
             $output | ForEach-Object { Write-Host $_ }
         }
 
-        if ($exitCode -ne 0) {
+        if ($exitCode -ne 0 -and $outputText -notmatch 'already connected to your project') {
             throw "Vercel CLI command failed with exit code $exitCode."
         }
+
+        return $outputText
     }
     finally {
         if ($EnvironmentVariables) {
@@ -330,13 +333,14 @@ switch ($Action) {
             VERCEL_ORG_ID     = if (-not [string]::IsNullOrWhiteSpace($teamId)) { $teamId } else { [string]$project.accountId }
         }
 
-        Invoke-VercelCliCommand -Arguments @("git", "connect", "--yes", "--token", $token) -EnvironmentVariables $cliEnvironment
+        $cliOutput = Invoke-VercelCliCommand -Arguments @("git", "connect", "--yes", "--token", $token) -EnvironmentVariables $cliEnvironment
 
         $updated = Get-VercelProjectByName -Name $resolvedProjectName
+        $result = if ($cliOutput -match 'already connected to your project') { 'already linked' } else { 'linked' }
         Write-IngestraSummary -Lines @(
             "## Vercel",
             "- Action: ensure project link",
-            "- Result: linked",
+            ("- Result: {0}" -f $result),
             ("- Project name: {0}" -f $resolvedProjectName),
             ("- Repo: {0}" -f $linkInputs.Repo),
             ("- Production branch: {0}" -f $linkInputs.ProductionBranch)

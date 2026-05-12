@@ -37,6 +37,13 @@ Describe "Vercel provider script" {
         $scriptContent | Should -Match 'VERCEL_ORG_ID'
     }
 
+    It "treats already-connected Vercel CLI output as a successful idempotent result" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
+
+        $scriptContent | Should -Match 'already connected to your project'
+        $scriptContent | Should -Match 'already linked'
+    }
+
     It "handles projects that do not yet expose a link property" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
 
