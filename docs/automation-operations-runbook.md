@@ -130,6 +130,15 @@ The intended automation flow is:
 10. run smoke tests when enabled
 11. publish logs, summaries, and test reports
 
+## Near-Term Sequence
+
+Use this order for the next implementation and verification work:
+
+1. implement `Vercel` project automation
+2. create a minimal frontend auth test page
+3. link the frontend to `Supabase` auth
+4. run an end-to-end Azure login test
+
 ## Provider Intent
 
 ### Azure
@@ -155,13 +164,15 @@ Automation should:
 - create the target project
 - preserve idempotent behavior through `EnsureProject`
 - expose the resulting project ref needed by the Azure redirect URI
-- later apply post-create configuration
+- configure Azure auth to use the generated Azure sign-in app
+- later apply remaining post-create configuration
 - later apply schema, auth, and environment-related setup
 
 Current proven result:
 
 - `EnsureProject` has successfully created the configured `Supabase` project in `GitHub Actions`
 - current project ref: `xshawwxhqjjbemptekjk`
+- Azure login is now visibly enabled in the live `Supabase` project
 
 ### Vercel
 
@@ -196,7 +207,6 @@ Automation is in the intended state when:
 
 Current gaps:
 
-- `Supabase` auth is not yet configured to consume the Azure sign-in app automatically
 - `Supabase` post-create configuration is not yet implemented
 - `Vercel` project automation is not implemented
 - the current `Pinecone` script does not yet consume the JSON config file

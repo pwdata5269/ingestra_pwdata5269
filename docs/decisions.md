@@ -88,3 +88,14 @@
   - `provision-test.yml` now proves the Azure login app step in `GitHub Actions`
   - the Azure step now emits a fresh client secret for the current run even when the app already exists
   - the next integration target is applying those Azure values into `Supabase` auth configuration
+
+### Supabase Azure Auth Configuration Proven
+
+- date: 2026-05-12
+- status: implemented
+- choice: configure `Supabase` auth to use the generated Azure sign-in app as part of provisioning
+- rationale: Azure login needed to be proven in the live `Supabase` project before moving on to the browser-based `Vercel` auth test harness
+- consequences:
+  - `Supabase` now visibly shows Azure login as enabled
+  - the next major implementation target is `Vercel` project automation
+  - the next major validation target is an end-to-end browser login test through the minimal frontend

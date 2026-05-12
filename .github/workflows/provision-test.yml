@@ -80,6 +80,13 @@ jobs:
             -Cloud aws `
             -Region us-east-1
 
+      - name: Ensure Vercel project
+        shell: pwsh
+        run: |
+          .\scripts\providers\Vercel.ps1 `
+            -Action EnsureProject `
+            -ConfigPath .\config\automation-config.json
+
       - name: Validate smoke-test bootstrap contract
         if: ${{ inputs.run_smoke_tests }}
         shell: pwsh
