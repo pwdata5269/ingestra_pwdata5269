@@ -31,6 +31,7 @@ Describe "Vercel provider script" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
 
         $scriptContent | Should -Match '/v9/projects/\$resolvedProjectName'
+        $scriptContent | Should -Match 'gitRepository'
         $scriptContent | Should -Match 'productionBranch'
         $scriptContent | Should -Match 'repo'
         $scriptContent | Should -Match 'type'

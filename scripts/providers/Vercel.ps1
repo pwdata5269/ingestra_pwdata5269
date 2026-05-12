@@ -288,7 +288,7 @@ switch ($Action) {
         }
 
         $body = @{
-            link = @{
+            gitRepository = @{
                 type = $linkInputs.GitProvider
                 repo = $linkInputs.Repo
                 productionBranch = $linkInputs.ProductionBranch
