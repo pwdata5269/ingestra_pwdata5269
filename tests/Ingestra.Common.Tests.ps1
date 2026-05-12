@@ -23,10 +23,11 @@ Describe "Get-IngestraRequiredSecretNames" {
     It "returns only Supabase schema secrets for the supabase-schema profile" {
         $names = Get-IngestraRequiredSecretNames -Profile "supabase-schema"
 
-        $names.Count | Should -Be 3
+        $names.Count | Should -Be 4
         ($names -contains "SUPABASE_ACCESS_TOKEN") | Should -Be $true
         ($names -contains "SUPABASE_ORG_SLUG") | Should -Be $true
         ($names -contains "SUPABASE_DB_PASSWORD") | Should -Be $true
+        ($names -contains "SUPABASE_DB_URL") | Should -Be $true
     }
 }
 

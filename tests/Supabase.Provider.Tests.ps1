@@ -81,9 +81,7 @@ Describe "Supabase provider script" {
         $scriptContent | Should -Match '"--dbname=\$DbUrl"'
         $scriptContent | Should -Match '"-v" "ON_ERROR_STOP=1"'
         $scriptContent | Should -Match 'foreach \(\$migrationFile in \$migrationFiles\)'
-        $scriptContent | Should -Match 'Get-SupabaseProjectDetails'
-        $scriptContent | Should -Match '\$project\.database\.host'
-        $scriptContent | Should -Match '@\$databaseHost:5432/postgres'
+        $scriptContent | Should -Match 'SUPABASE_DB_URL is required for EnsureSchema'
         $scriptContent | Should -Match 'RLS: enabled in checked-in migrations'
     }
 }

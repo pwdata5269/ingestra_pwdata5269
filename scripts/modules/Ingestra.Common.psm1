@@ -31,7 +31,8 @@ function Get-IngestraRequiredSecretNames {
             return @(
                 "SUPABASE_ACCESS_TOKEN",
                 "SUPABASE_ORG_SLUG",
-                "SUPABASE_DB_PASSWORD"
+                "SUPABASE_DB_PASSWORD",
+                "SUPABASE_DB_URL"
             )
         }
         "smoke" {
