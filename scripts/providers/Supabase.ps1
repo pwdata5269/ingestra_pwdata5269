@@ -227,13 +227,13 @@ function Get-SupabaseDbUrl {
     }
 
     $project = Get-SupabaseProjectDetails -Ref $Ref
-    $host = [string]$project.database.host
-    if ([string]::IsNullOrWhiteSpace($host)) {
+    $databaseHost = [string]$project.database.host
+    if ([string]::IsNullOrWhiteSpace($databaseHost)) {
         throw "Supabase database host was not returned for project '$Ref'."
     }
 
     $encodedPassword = [System.Uri]::EscapeDataString($dbPassword)
-    return "postgresql://postgres:$encodedPassword@$host:5432/postgres"
+    return "postgresql://postgres:$encodedPassword@$databaseHost:5432/postgres"
 }
 
 function Invoke-SupabaseCliCommand {
