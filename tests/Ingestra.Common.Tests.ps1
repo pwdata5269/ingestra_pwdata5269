@@ -29,6 +29,15 @@ Describe "Get-IngestraRequiredSecretNames" {
         ($names -contains "SUPABASE_DB_PASSWORD") | Should -Be $true
         ($names -contains "SUPABASE_DB_URL") | Should -Be $true
     }
+
+    It "returns only Supabase project secrets for the supabase-project profile" {
+        $names = Get-IngestraRequiredSecretNames -Profile "supabase-project"
+
+        $names.Count | Should -Be 3
+        ($names -contains "SUPABASE_ACCESS_TOKEN") | Should -Be $true
+        ($names -contains "SUPABASE_ORG_SLUG") | Should -Be $true
+        ($names -contains "SUPABASE_DB_PASSWORD") | Should -Be $true
+    }
 }
 
 Describe "Test-IngestraSecretsPresent" {

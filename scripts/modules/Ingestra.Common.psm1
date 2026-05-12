@@ -7,7 +7,7 @@ function Get-IngestraRequiredSecretNames {
     [CmdletBinding()]
     param(
         [Parameter()]
-        [ValidateSet("minimal", "provision", "supabase-schema", "smoke")]
+        [ValidateSet("minimal", "provision", "supabase-project", "supabase-schema", "smoke")]
         [string]$Profile = "minimal"
     )
 
@@ -33,6 +33,13 @@ function Get-IngestraRequiredSecretNames {
                 "SUPABASE_ORG_SLUG",
                 "SUPABASE_DB_PASSWORD",
                 "SUPABASE_DB_URL"
+            )
+        }
+        "supabase-project" {
+            return @(
+                "SUPABASE_ACCESS_TOKEN",
+                "SUPABASE_ORG_SLUG",
+                "SUPABASE_DB_PASSWORD"
             )
         }
         "smoke" {
