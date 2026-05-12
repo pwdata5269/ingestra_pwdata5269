@@ -16,10 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Validate provision bootstrap contract
+      - name: Validate Supabase schema bootstrap contract
         shell: pwsh
         run: |
-          .\scripts\Test-BootstrapPrereqs.ps1 -Profile provision
+          .\scripts\Test-BootstrapPrereqs.ps1 -Profile supabase-schema
 
       - name: Ensure Supabase project
         id: ensure_supabase

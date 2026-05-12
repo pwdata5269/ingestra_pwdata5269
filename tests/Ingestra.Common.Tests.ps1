@@ -19,6 +19,15 @@ Describe "Get-IngestraRequiredSecretNames" {
         ($names -contains "INGESTRA_SEARCH_URL") | Should -Be $true
         ($names -contains "INGESTRA_CHAT_URL") | Should -Be $true
     }
+
+    It "returns only Supabase schema secrets for the supabase-schema profile" {
+        $names = Get-IngestraRequiredSecretNames -Profile "supabase-schema"
+
+        $names.Count | Should -Be 3
+        ($names -contains "SUPABASE_ACCESS_TOKEN") | Should -Be $true
+        ($names -contains "SUPABASE_ORG_SLUG") | Should -Be $true
+        ($names -contains "SUPABASE_DB_PASSWORD") | Should -Be $true
+    }
 }
 
 Describe "Test-IngestraSecretsPresent" {

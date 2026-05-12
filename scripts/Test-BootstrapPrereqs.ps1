@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [ValidateSet("minimal", "provision", "smoke")]
+    [ValidateSet("minimal", "provision", "supabase-schema", "smoke")]
     [string]$Profile = "minimal"
 )
 
