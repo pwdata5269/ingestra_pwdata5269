@@ -105,16 +105,17 @@ Current repo entry points:
 
 - `validate.yml`
 - `provision-test.yml`
+- `supabase-schema-test.yml`
 - `scripts/providers/Azure.ps1`
 - `scripts/providers/Supabase.ps1`
 - `scripts/Test-BootstrapPrereqs.ps1`
 - `scripts/providers/Pinecone.ps1`
+- `scripts/providers/Vercel.ps1`
 - `scripts/Invoke-IngestraSmokeTests.ps1`
 
 Later provider entry points should be added for:
 
-- `Supabase` project creation and post-create configuration
-- `Vercel` project creation, repo linkage, deployment protection, and CI-driven deployment
+- remaining `Supabase` post-create configuration beyond the initial schema and auth setup
 - `n8n` deployment validation
 
 Current checked-in schema source for later `Supabase` post-create automation:
@@ -153,11 +154,11 @@ For isolated schema validation, the current intended flow is:
 
 Use this order for the next implementation and verification work:
 
-1. implement `Vercel` project automation
-2. ensure the GitHub repository is linked to the `Vercel` project, assuming `Vercel` has already been granted access to that repository
-3. verify the CI-driven static frontend deployment path on `Vercel`
-4. verify the minimal frontend auth page is reachable
-5. prove Azure login end to end through the deployed harness
+1. define the `n8n` deployment model for CI-compatible validation
+2. add environment-specific config templates
+3. add end-to-end fixtures for upload, retrieval, and chat
+4. decide whether parser-service validation belongs in standard CI or only in a gated environment
+5. plan the eventual soft teardown and rebuild validation pass
 
 ## Provider Intent
 
@@ -202,6 +203,7 @@ Current proven result:
 - Azure login is now visibly enabled in the live `Supabase` project
 - the current schema-automation contract uses a stored session-pooler connection string in `SUPABASE_DB_URL`
 - the current isolated schema workflow pauses at `supabase-schema-ready` so a human can confirm or add `SUPABASE_DB_URL` before schema application
+- the isolated schema workflow has successfully applied the checked-in SQL through `psql` after the `supabase-schema-ready` approval step
 
 Current declared next schema target:
 
@@ -274,7 +276,6 @@ Automation is in the intended state when:
 
 Current gaps:
 
-- `Supabase` post-create schema application still needs to be proven end to end in `GitHub Actions`
 - `Vercel` GitHub repository authorization remains a one-time manual prerequisite
 - the current `Pinecone` script does not yet consume the JSON config file
 - integrated-embedding `Pinecone` index creation is not yet scripted

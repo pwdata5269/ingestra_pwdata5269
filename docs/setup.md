@@ -50,13 +50,14 @@ The repo currently automates or validates these areas:
 - direct frontend deployment to `Vercel` from `GitHub Actions`
 - browser-based Azure login verification through the deployed auth harness
 - gated schema validation against `Supabase` using `SUPABASE_DB_URL`, `psql`, and the `supabase-schema-ready` environment
+- end-to-end proof that the gated `Supabase` schema workflow can apply the checked-in SQL successfully
 - `Pester` test execution in CI
 - `Pinecone` index creation, confirmation, and deletion
 - basic smoke-test execution against configured HTTP endpoints
 
 The repo does not yet fully automate:
 
-- `Supabase` post-create configuration
+- remaining `Supabase` post-create configuration beyond the current auth and initial schema path
 - one-time `Vercel` GitHub repository authorization
 - `n8n` deployment and CI-compatible validation
 - full end-to-end upload, retrieval, and chat fixtures
@@ -84,11 +85,13 @@ Optional or later secrets:
 - `INGESTRA_SEARCH_URL`
 - `INGESTRA_CHAT_URL`
 
-`SUPABASE_DB_URL` should currently be the real Supabase session-pooler connection string used for schema automation, for example:
+`SUPABASE_DB_URL` should currently be the Supabase session-pooler connection string used for schema automation, for example:
 
 ```text
-postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
+postgresql://postgres.<project-ref>:[YOUR-PASSWORD]@aws-0-<region>.pooler.supabase.com:5432/postgres
 ```
+
+The schema workflow replaces `[YOUR-PASSWORD]` from `SUPABASE_DB_PASSWORD` at runtime.
 
 ## Local Validation
 

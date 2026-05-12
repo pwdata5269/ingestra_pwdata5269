@@ -151,6 +151,17 @@
 - choice: use a stored `SUPABASE_DB_URL` repository secret containing the Supabase session-pooler connection string for schema automation
 - rationale: this is simpler and more reliable in CI than reconstructing connection details dynamically or fighting CLI host-resolution edge cases
 - consequences:
-  - schema automation should use `psql` with `SUPABASE_DB_URL`
-  - the checked-in SQL remains the source of truth for schema and RLS
-  - `SUPABASE_DB_URL` becomes a post-project secret needed before schema automation can run
+- schema automation should use `psql` with `SUPABASE_DB_URL`
+- the checked-in SQL remains the source of truth for schema and RLS
+- `SUPABASE_DB_URL` becomes a post-project secret needed before schema automation can run
+
+### Supabase Schema Automation Proven
+
+- date: 2026-05-12
+- status: implemented
+- choice: apply the checked-in initial `Supabase` schema through an isolated `GitHub Actions` workflow that uses `psql`, `SUPABASE_DB_URL`, and the `supabase-schema-ready` approval gate
+- rationale: schema application needed a deterministic CI path and an explicit human checkpoint for the project-specific database connection contract
+- consequences:
+  - `supabase-schema-test.yml` is now the canonical proof path for initial schema application
+  - the approval gate and `psql` execution path are proven end to end
+  - remaining `Supabase` post-create work should build on the same checked-in SQL plus orchestrating-script pattern

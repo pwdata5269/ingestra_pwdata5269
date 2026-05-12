@@ -244,13 +244,14 @@ After the automated `Supabase` project has been created, capture the project dat
 Use the real session-pooler string from `Connect`, for example:
 
 ```text
-postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
+postgresql://postgres.<project-ref>:[YOUR-PASSWORD]@aws-0-<region>.pooler.supabase.com:5432/postgres
 ```
 
 Acceptance criteria:
 
 - `SUPABASE_DB_URL` exists in `GitHub Actions` repository secrets
-- the value is the real session-pooler connection string for the created project
+- the value is the session-pooler connection string template for the created project
+- the operator knows `[YOUR-PASSWORD]` is replaced automatically from `SUPABASE_DB_PASSWORD` during schema automation
 
 ## Environment Approval For Schema Automation
 

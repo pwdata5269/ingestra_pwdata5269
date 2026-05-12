@@ -13,11 +13,10 @@
 - `Vercel` project creation and GitHub repo linkage are now proven in `GitHub Actions`
 - the `Vercel` auth harness has been deployed successfully and Azure login through `Supabase` has been manually proven end to end
 - the current `Supabase` schema automation contract now uses checked-in SQL plus `SUPABASE_DB_URL` for the session-pooler connection string
+- the isolated `Supabase` schema workflow has now been proven end to end, including the `supabase-schema-ready` approval gate and `psql`-based schema application
 
 ## Next Tasks
 
-- prove `Supabase` post-create schema application end to end through the isolated schema workflow
-- confirm the `supabase-schema-ready` environment gate and approval path are working as intended for maintainers
 - define the `n8n` deployment model for CI-compatible validation
 - add environment-specific config templates
 - add end-to-end test fixtures for upload, retrieval, and chat
@@ -42,6 +41,7 @@
 - the repo can generate a static frontend runtime config and deploy the frontend to `Vercel` from `GitHub Actions`
 - the repo can prove Azure login end to end through the deployed `Vercel` auth harness
 - the repo has a checked-in SQL schema source for the initial `Supabase` tables and RLS posture
+- the repo can apply the checked-in `Supabase` schema safely through the gated isolated workflow using `SUPABASE_DB_URL` and `psql`
 - the repo can create or reset a test `Pinecone` index from CI inputs
 - smoke tests can fail fast with actionable output
 - future `Qdrant` support can be added without reworking the entire repo shape
