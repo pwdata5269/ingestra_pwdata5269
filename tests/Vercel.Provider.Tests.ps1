@@ -36,6 +36,13 @@ Describe "Vercel provider script" {
         $scriptContent | Should -Match 'type'
     }
 
+    It "handles projects that do not yet expose a link property" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
+
+        $scriptContent | Should -Match 'function Get-VercelProjectLink'
+        $scriptContent | Should -Match '\$Project\.PSObject\.Properties\["link"\]'
+    }
+
     It "upserts environment variables through the Vercel env API" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
 

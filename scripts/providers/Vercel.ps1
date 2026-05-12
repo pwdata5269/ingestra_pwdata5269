@@ -192,6 +192,20 @@ function Get-VercelProjectByName {
     return $match[0]
 }
 
+function Get-VercelProjectLink {
+    param(
+        [Parameter(Mandatory)]
+        $Project
+    )
+
+    $property = $Project.PSObject.Properties["link"]
+    if ($null -eq $property) {
+        return $null
+    }
+
+    return $property.Value
+}
+
 switch ($Action) {
     "ListProjects" {
         $projects = Get-VercelProjects
@@ -251,7 +265,7 @@ switch ($Action) {
             throw "Vercel project '$resolvedProjectName' was not found."
         }
 
-        $currentLink = $project.link
+        $currentLink = Get-VercelProjectLink -Project $project
         $isLinked = (
             $null -ne $currentLink -and
             [string]$currentLink.type -eq $linkInputs.GitProvider -and
