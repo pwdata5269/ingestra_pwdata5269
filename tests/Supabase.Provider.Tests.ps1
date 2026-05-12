@@ -77,6 +77,9 @@ Describe "Supabase provider script" {
         $scriptContent | Should -Match 'supabase\\migrations'
         $scriptContent | Should -Match 'supabase@latest'
         $scriptContent | Should -Match '"db", "push", "--db-url"'
+        $scriptContent | Should -Match 'Get-SupabaseProjectDetails'
+        $scriptContent | Should -Match '\$project\.database\.host'
+        $scriptContent | Should -Match '@\$host:5432/postgres'
         $scriptContent | Should -Match 'RLS: enabled in checked-in migrations'
     }
 }

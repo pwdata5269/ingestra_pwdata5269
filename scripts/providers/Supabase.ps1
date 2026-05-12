@@ -150,6 +150,15 @@ function Get-SupabaseProjectUrl {
     return "https://$Ref.supabase.co"
 }
 
+function Get-SupabaseProjectDetails {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Ref
+    )
+
+    return (Invoke-IngestraApiRequest -Method GET -Uri "$baseUri/projects/$Ref" -Headers $headers)
+}
+
 function Get-SupabasePublicClientKey {
     param(
         [Parameter(Mandatory)]
@@ -217,8 +226,14 @@ function Get-SupabaseDbUrl {
         throw "SUPABASE_DB_PASSWORD is required."
     }
 
+    $project = Get-SupabaseProjectDetails -Ref $Ref
+    $host = [string]$project.database.host
+    if ([string]::IsNullOrWhiteSpace($host)) {
+        throw "Supabase database host was not returned for project '$Ref'."
+    }
+
     $encodedPassword = [System.Uri]::EscapeDataString($dbPassword)
-    return "postgresql://postgres:$encodedPassword@db.$Ref.supabase.co:6543/postgres"
+    return "postgresql://postgres:$encodedPassword@$host:5432/postgres"
 }
 
 function Invoke-SupabaseCliCommand {
