@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidateSet("ListProjects", "EnsureProject", "EnsureProjectLink", "UpsertEnvironmentVariables")]
+    [ValidateSet("ListProjects", "EnsureProject", "EnsureProjectLink", "GetProjectDomains", "UpsertEnvironmentVariables")]
     [string]$Action,
 
     [Parameter()]
@@ -253,6 +253,72 @@ function Get-VercelProjectLink {
     return $property.Value
 }
 
+function Get-VercelProjectDomains {
+    param(
+        [Parameter(Mandatory)]
+        $Project
+    )
+
+    $domains = [System.Collections.Generic.List[string]]::new()
+
+    $targetsProperty = $Project.PSObject.Properties["targets"]
+    if ($null -ne $targetsProperty -and $null -ne $targetsProperty.Value.production) {
+        foreach ($alias in @($targetsProperty.Value.production.alias)) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$alias)) {
+                $domains.Add([string]$alias)
+            }
+        }
+    }
+
+    $latestDeploymentsProperty = $Project.PSObject.Properties["latestDeployments"]
+    if ($null -ne $latestDeploymentsProperty) {
+        foreach ($deployment in @($latestDeploymentsProperty.Value)) {
+            foreach ($alias in @($deployment.alias)) {
+                if (-not [string]::IsNullOrWhiteSpace([string]$alias) -and -not $domains.Contains([string]$alias)) {
+                    $domains.Add([string]$alias)
+                }
+            }
+        }
+    }
+
+    return @($domains)
+}
+
+function Resolve-VercelBrowserUrls {
+    param(
+        [Parameter(Mandatory)]
+        $Project,
+
+        [Parameter(Mandatory)]
+        [string]$ResolvedProjectName
+    )
+
+    $domains = @(Get-VercelProjectDomains -Project $Project)
+    if ($domains.Count -eq 0) {
+        throw "No Vercel domains were available for project '$ResolvedProjectName'."
+    }
+
+    $productionDomain = $domains | Where-Object { $_ -match "^$([regex]::Escape($ResolvedProjectName))-" } | Select-Object -First 1
+    if ([string]::IsNullOrWhiteSpace($productionDomain)) {
+        $productionDomain = $domains[0]
+    }
+
+    $suffix = $null
+    if ($productionDomain -match "^$([regex]::Escape($ResolvedProjectName))-(?<suffix>.+)$") {
+        $suffix = $Matches.suffix
+    }
+
+    if ([string]::IsNullOrWhiteSpace($suffix)) {
+        throw "Unable to derive Vercel wildcard redirect suffix from domain '$productionDomain'."
+    }
+
+    [pscustomobject]@{
+        ProductionUrl         = "https://$productionDomain"
+        PreviewWildcardUrl    = "https://*-$suffix/**"
+        ProductionDomain      = $productionDomain
+    }
+}
+
 switch ($Action) {
     "ListProjects" {
         $projects = Get-VercelProjects
@@ -355,12 +421,38 @@ switch ($Action) {
         break
     }
 
+    "GetProjectDomains" {
+        $resolvedProjectName = Resolve-VercelProjectName
+        $project = Get-VercelProjectByName -Name $resolvedProjectName
+
+        if ($null -eq $project) {
+            throw "Vercel project '$resolvedProjectName' was not found."
+        }
+
+        $browserUrls = Resolve-VercelBrowserUrls -Project $project -ResolvedProjectName $resolvedProjectName
+        Set-IngestraOutput -Name "vercel_production_url" -Value $browserUrls.ProductionUrl
+        Set-IngestraOutput -Name "vercel_preview_wildcard_url" -Value $browserUrls.PreviewWildcardUrl
+        Write-IngestraSummary -Lines @(
+            "## Vercel",
+            "- Action: get project domains",
+            "- Result: resolved",
+            ("- Project name: {0}" -f $resolvedProjectName),
+            ("- Production URL: {0}" -f $browserUrls.ProductionUrl),
+            ("- Preview wildcard URL: {0}" -f $browserUrls.PreviewWildcardUrl)
+        )
+        [pscustomobject]@{
+            production_url      = $browserUrls.ProductionUrl
+            preview_wildcard_url = $browserUrls.PreviewWildcardUrl
+        } | ConvertTo-Json -Depth 10
+        break
+    }
+
     "UpsertEnvironmentVariables" {
         $resolvedProjectName = Resolve-VercelProjectName
         $vars = @()
 
         $supabaseUrl = [Environment]::GetEnvironmentVariable("SUPABASE_URL")
-        $supabaseAnonKey = [Environment]::GetEnvironmentVariable("SUPABASE_ANON_KEY")
+        $supabasePublicKey = [Environment]::GetEnvironmentVariable("SUPABASE_PUBLIC_KEY")
 
         if (-not [string]::IsNullOrWhiteSpace($supabaseUrl)) {
             $vars += @{
@@ -371,10 +463,10 @@ switch ($Action) {
             }
         }
 
-        if (-not [string]::IsNullOrWhiteSpace($supabaseAnonKey)) {
+        if (-not [string]::IsNullOrWhiteSpace($supabasePublicKey)) {
             $vars += @{
-                key = "SUPABASE_ANON_KEY"
-                value = $supabaseAnonKey
+                key = "SUPABASE_PUBLIC_KEY"
+                value = $supabasePublicKey
                 target = @("production", "preview", "development")
                 type = "encrypted"
             }

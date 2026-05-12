@@ -24,6 +24,10 @@
     "teamId": "",
     "environmentVariableWiringEnabled": false
   },
+  "frontend": {
+    "localDevelopmentUrl": "http://localhost:3000",
+    "authTestPath": "/"
+  },
   "pinecone": {
     "createIndex": true,
     "indexName": "ingestra-ci",

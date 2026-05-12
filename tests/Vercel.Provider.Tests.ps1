@@ -15,6 +15,12 @@ Describe "Vercel provider script" {
         $scriptContent | Should -Match '"EnsureProjectLink"'
     }
 
+    It "accepts GetProjectDomains as a supported action" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
+
+        $scriptContent | Should -Match '"GetProjectDomains"'
+    }
+
     It "accepts UpsertEnvironmentVariables as a supported action" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
 
@@ -51,10 +57,19 @@ Describe "Vercel provider script" {
         $scriptContent | Should -Match '\$Project\.PSObject\.Properties\["link"\]'
     }
 
+    It "derives Vercel frontend URLs from project aliases" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
+
+        $scriptContent | Should -Match 'function Resolve-VercelBrowserUrls'
+        $scriptContent | Should -Match 'vercel_production_url'
+        $scriptContent | Should -Match 'vercel_preview_wildcard_url'
+    }
+
     It "upserts environment variables through the Vercel env API" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
 
         $scriptContent | Should -Match '/v10/projects/\$resolvedProjectName/env'
         $scriptContent | Should -Match 'upsert = "true"'
+        $scriptContent | Should -Match 'SUPABASE_PUBLIC_KEY'
     }
 }

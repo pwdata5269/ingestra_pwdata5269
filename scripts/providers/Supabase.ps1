@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidateSet("ListOrganizations", "ListProjects", "CreateProject", "EnsureProject", "EnsureAzureAuthConfig")]
+    [ValidateSet("ListOrganizations", "ListProjects", "CreateProject", "EnsureProject", "EnsureAzureAuthConfig", "EnsureBrowserAuthConfig", "GetPublicClientConfig")]
     [string]$Action,
 
     [Parameter()]
@@ -18,6 +18,12 @@ param(
 
     [Parameter()]
     [string]$AzureClientSecret,
+
+    [Parameter()]
+    [string]$SiteUrl,
+
+    [Parameter()]
+    [string]$RedirectUrlAllowList,
 
     [Parameter()]
     [string]$ConfigPath
@@ -52,6 +58,25 @@ function Get-SupabaseConfigValue {
     }
 
     $section = Get-IngestraAutomationConfigSection -SectionName "supabase" -Path $ConfigPath
+    $property = $section.PSObject.Properties[$PropertyName]
+    if ($null -eq $property) {
+        return $null
+    }
+
+    return [string]$property.Value
+}
+
+function Get-FrontendConfigValue {
+    param(
+        [Parameter(Mandatory)]
+        [string]$PropertyName
+    )
+
+    if ([string]::IsNullOrWhiteSpace($ConfigPath)) {
+        return $null
+    }
+
+    $section = Get-IngestraAutomationConfigSection -SectionName "frontend" -Path $ConfigPath
     $property = $section.PSObject.Properties[$PropertyName]
     if ($null -eq $property) {
         return $null
@@ -113,6 +138,57 @@ function Resolve-SupabaseProjectRef {
     }
 
     return [string]$project.ref
+}
+
+function Get-SupabaseProjectUrl {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Ref
+    )
+
+    return "https://$Ref.supabase.co"
+}
+
+function Get-SupabasePublicClientKey {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Ref
+    )
+
+    $keys = Invoke-IngestraApiRequest -Method GET -Uri "$baseUri/projects/$Ref/api-keys?reveal=true" -Headers $headers
+    $preferred = @(
+        $keys | Where-Object { $_.name -match 'publishable' } | Select-Object -First 1
+        $keys | Where-Object { $_.name -match 'anon' } | Select-Object -First 1
+    ) | Where-Object { $null -ne $_ } | Select-Object -First 1
+
+    if ($null -eq $preferred) {
+        throw "No publishable or anon key was returned for Supabase project '$Ref'."
+    }
+
+    return [string]$preferred.api_key
+}
+
+function Resolve-BrowserAuthConfig {
+    $resolvedSiteUrl = $SiteUrl
+    $resolvedRedirectUrlAllowList = $RedirectUrlAllowList
+
+    if ([string]::IsNullOrWhiteSpace($resolvedSiteUrl)) {
+        throw "SiteUrl is required for EnsureBrowserAuthConfig."
+    }
+
+    if ([string]::IsNullOrWhiteSpace($resolvedRedirectUrlAllowList)) {
+        $localDevelopmentUrl = Get-FrontendConfigValue -PropertyName "localDevelopmentUrl"
+        if ([string]::IsNullOrWhiteSpace($localDevelopmentUrl)) {
+            $localDevelopmentUrl = "http://localhost:3000"
+        }
+
+        $resolvedRedirectUrlAllowList = ($localDevelopmentUrl.TrimEnd("/") + "/**")
+    }
+
+    [pscustomobject]@{
+        SiteUrl              = $resolvedSiteUrl
+        RedirectUrlAllowList = $resolvedRedirectUrlAllowList
+    }
 }
 
 switch ($Action) {
@@ -259,6 +335,56 @@ switch ($Action) {
         )
         Set-IngestraOutput -Name "supabase_project_ref" -Value $resolvedProjectRef
         $configured | ConvertTo-Json -Depth 10
+        break
+    }
+
+    "EnsureBrowserAuthConfig" {
+        $resolvedProjectRef = Resolve-SupabaseProjectRef
+        $resolvedBrowserAuthConfig = Resolve-BrowserAuthConfig
+
+        $body = @{
+            site_url       = $resolvedBrowserAuthConfig.SiteUrl
+            uri_allow_list = $resolvedBrowserAuthConfig.RedirectUrlAllowList
+        }
+
+        $configured = Invoke-IngestraApiRequest -Method PATCH -Uri "$baseUri/projects/$resolvedProjectRef/config/auth" -Headers $headers -Body $body
+        Write-IngestraSummary -Lines @(
+            "## Supabase Auth",
+            "- Action: ensure browser auth config",
+            "- Result: configured",
+            ("- Project ref: {0}" -f $resolvedProjectRef),
+            ("- Site URL: {0}" -f $resolvedBrowserAuthConfig.SiteUrl),
+            ("- Redirect allow list: {0}" -f $resolvedBrowserAuthConfig.RedirectUrlAllowList)
+        )
+        Set-IngestraOutput -Name "supabase_project_ref" -Value $resolvedProjectRef
+        Set-IngestraOutput -Name "supabase_site_url" -Value $resolvedBrowserAuthConfig.SiteUrl
+        Set-IngestraOutput -Name "supabase_redirect_url_allow_list" -Value $resolvedBrowserAuthConfig.RedirectUrlAllowList
+        $configured | ConvertTo-Json -Depth 10
+        break
+    }
+
+    "GetPublicClientConfig" {
+        $resolvedProjectRef = Resolve-SupabaseProjectRef
+        $supabaseUrl = Get-SupabaseProjectUrl -Ref $resolvedProjectRef
+        $supabasePublicKey = Get-SupabasePublicClientKey -Ref $resolvedProjectRef
+
+        Add-IngestraMask -Value $supabasePublicKey
+        Set-IngestraOutput -Name "supabase_project_ref" -Value $resolvedProjectRef
+        Set-IngestraOutput -Name "supabase_url" -Value $supabaseUrl
+        Set-IngestraOutput -Name "supabase_public_key" -Value $supabasePublicKey
+        Write-IngestraSummary -Lines @(
+            "## Supabase Frontend Config",
+            "- Action: get public client config",
+            "- Result: resolved",
+            ("- Project ref: {0}" -f $resolvedProjectRef),
+            ("- Supabase URL: {0}" -f $supabaseUrl)
+        )
+
+        [pscustomobject]@{
+            project_ref         = $resolvedProjectRef
+            supabase_url        = $supabaseUrl
+            supabase_public_key = $supabasePublicKey
+        } | ConvertTo-Json -Depth 10
         break
     }
 }

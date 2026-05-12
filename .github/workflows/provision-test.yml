@@ -88,10 +88,48 @@ jobs:
             -ConfigPath .\config\automation-config.json
 
       - name: Ensure Vercel project link
+        id: ensure_vercel_project_link
         shell: pwsh
         run: |
           .\scripts\providers\Vercel.ps1 `
             -Action EnsureProjectLink `
+            -ConfigPath .\config\automation-config.json
+
+      - name: Resolve Vercel frontend URLs
+        id: resolve_vercel_frontend_urls
+        shell: pwsh
+        run: |
+          .\scripts\providers\Vercel.ps1 `
+            -Action GetProjectDomains `
+            -ConfigPath .\config\automation-config.json
+
+      - name: Ensure Supabase browser auth config
+        shell: pwsh
+        run: |
+          .\scripts\providers\Supabase.ps1 `
+            -Action EnsureBrowserAuthConfig `
+            -ProjectRef "${{ steps.ensure_supabase.outputs.supabase_project_ref }}" `
+            -SiteUrl "${{ steps.resolve_vercel_frontend_urls.outputs.vercel_production_url }}" `
+            -RedirectUrlAllowList "http://localhost:3000/**,${{ steps.resolve_vercel_frontend_urls.outputs.vercel_preview_wildcard_url }},${{ steps.resolve_vercel_frontend_urls.outputs.vercel_production_url }}/**" `
+            -ConfigPath .\config\automation-config.json
+
+      - name: Resolve Supabase public client config
+        id: resolve_supabase_public_client
+        shell: pwsh
+        run: |
+          .\scripts\providers\Supabase.ps1 `
+            -Action GetPublicClientConfig `
+            -ProjectRef "${{ steps.ensure_supabase.outputs.supabase_project_ref }}" `
+            -ConfigPath .\config\automation-config.json
+
+      - name: Upsert Vercel environment variables
+        shell: pwsh
+        env:
+          SUPABASE_URL: ${{ steps.resolve_supabase_public_client.outputs.supabase_url }}
+          SUPABASE_PUBLIC_KEY: ${{ steps.resolve_supabase_public_client.outputs.supabase_public_key }}
+        run: |
+          .\scripts\providers\Vercel.ps1 `
+            -Action UpsertEnvironmentVariables `
             -ConfigPath .\config\automation-config.json
 
       - name: Validate smoke-test bootstrap contract

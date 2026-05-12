@@ -21,6 +21,18 @@ Describe "Supabase provider script" {
         $scriptContent | Should -Match '"EnsureAzureAuthConfig"'
     }
 
+    It "accepts EnsureBrowserAuthConfig as a supported action" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Supabase.ps1" -Raw
+
+        $scriptContent | Should -Match '"EnsureBrowserAuthConfig"'
+    }
+
+    It "accepts GetPublicClientConfig as a supported action" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Supabase.ps1" -Raw
+
+        $scriptContent | Should -Match '"GetPublicClientConfig"'
+    }
+
     It "returns null safely when no existing project matches" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Supabase.ps1" -Raw
 
@@ -36,5 +48,20 @@ Describe "Supabase provider script" {
         $scriptContent | Should -Match 'external_azure_client_id'
         $scriptContent | Should -Match 'external_azure_secret'
         $scriptContent | Should -Match 'external_azure_url'
+    }
+
+    It "patches browser auth config with site url and redirect allow list" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Supabase.ps1" -Raw
+
+        $scriptContent | Should -Match 'site_url'
+        $scriptContent | Should -Match 'uri_allow_list'
+        $scriptContent | Should -Match 'EnsureBrowserAuthConfig'
+    }
+
+    It "resolves a public client key from the project API keys endpoint" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Supabase.ps1" -Raw
+
+        $scriptContent | Should -Match '/api-keys\?reveal=true'
+        $scriptContent | Should -Match 'supabase_public_key'
     }
 }

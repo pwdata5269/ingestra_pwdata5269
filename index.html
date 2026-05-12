@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ingestra Auth Harness</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">Ingestra</p>
+        <h1>Azure Login Harness</h1>
+        <p class="lede">
+          This page exists to prove the Vercel, Supabase, and Azure auth path end to end.
+        </p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-row">
+          <span class="label">Status</span>
+          <span id="status-pill" class="pill pill-waiting">Loading</span>
+        </div>
+
+        <div class="actions">
+          <button id="sign-in-button" class="button button-primary" type="button">Sign in with Azure</button>
+          <button id="sign-out-button" class="button button-secondary" type="button">Sign out</button>
+        </div>
+
+        <dl class="details">
+          <div>
+            <dt>Current URL</dt>
+            <dd id="current-url"></dd>
+          </div>
+          <div>
+            <dt>Supabase URL</dt>
+            <dd id="supabase-url">Not loaded</dd>
+          </div>
+          <div>
+            <dt>User</dt>
+            <dd id="user-email">Not signed in</dd>
+          </div>
+          <div>
+            <dt>Provider</dt>
+            <dd id="provider-name">Unknown</dd>
+          </div>
+        </dl>
+
+        <div class="message-block">
+          <p class="label">Session Payload</p>
+          <pre id="session-output">Waiting for session…</pre>
+        </div>
+
+        <div class="message-block">
+          <p class="label">Errors</p>
+          <pre id="error-output">None</pre>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
