@@ -110,3 +110,14 @@
   - the human bootstrap runbook must require `Vercel` GitHub authorization before provisioning
   - automation may assume repository visibility only after that prerequisite is complete
   - `Vercel` repo-link failures before authorization should be treated as bootstrap gaps, not script defects
+
+### Vercel Project And Repo Link Automation Proven
+
+- date: 2026-05-12
+- status: implemented
+- choice: prove `Vercel` project creation and repository linkage through `GitHub Actions`, while treating repository authorization as a one-time manual prerequisite
+- rationale: the repo needed a reliable browser-facing deployment target before building the minimal auth test page
+- consequences:
+  - `provision-test.yml` now proves both `EnsureProject` and `EnsureProjectLink`
+  - the next major implementation target is `Vercel` environment-variable wiring
+  - the next major validation target is the minimal frontend auth test page and end-to-end Azure login flow

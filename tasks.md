@@ -10,12 +10,11 @@
 - `Supabase` project provisioning is now wired into `GitHub Actions` and has been proven through `EnsureProject`
 - Azure app-registration automation for `Supabase` login is now wired into `GitHub Actions` and has been proven, including idempotent client-secret creation on rerun
 - `Supabase` auth is now visibly enabled for Azure login
+- `Vercel` project creation and GitHub repo linkage are now proven in `GitHub Actions`
 
 ## Next Tasks
 
 - implement `Supabase` post-create configuration steps
-- complete the one-time manual `Vercel` GitHub repository authorization/bootstrap step
-- revalidate `Vercel` project creation and GitHub repo linkage after the manual authorization step
 - implement `Vercel` environment-variable wiring
 - create a minimal frontend auth test page on `Vercel`
 - run an end-to-end Azure login test through `Supabase`

@@ -188,6 +188,11 @@ Automation should:
 - apply project-level configuration
 - later wire required environment variables
 
+Current proven result:
+
+- `EnsureProject` has successfully created or confirmed the configured `Vercel` project in `GitHub Actions`
+- `EnsureProjectLink` has successfully linked the configured GitHub repository and production branch in `GitHub Actions`
+
 ### Pinecone
 
 Automation should:
@@ -215,7 +220,6 @@ Current gaps:
 
 - `Supabase` post-create configuration is not yet implemented
 - `Vercel` GitHub repository authorization remains a one-time manual prerequisite
-- `Vercel` GitHub repository linkage needs to be revalidated after the manual authorization step is complete
 - `Vercel` environment-variable wiring is not yet implemented
 - the current `Pinecone` script does not yet consume the JSON config file
 - integrated-embedding `Pinecone` index creation is not yet scripted
