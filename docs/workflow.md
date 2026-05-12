@@ -24,6 +24,7 @@ This repo owns the automation workflow around the `Ingestra` platform.
 - emit a fresh usable Azure client secret for the current run
 - create or confirm the vector index in `Pinecone`
 - create or confirm the `Vercel` project
+- create or confirm the `Vercel` GitHub repository link and production branch mapping
 - later: apply schema and environment settings
 
 ### Test

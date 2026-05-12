@@ -9,6 +9,12 @@ Describe "Vercel provider script" {
         $scriptContent | Should -Match '"EnsureProject"'
     }
 
+    It "accepts EnsureProjectLink as a supported action" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
+
+        $scriptContent | Should -Match '"EnsureProjectLink"'
+    }
+
     It "accepts UpsertEnvironmentVariables as a supported action" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
 
@@ -19,6 +25,15 @@ Describe "Vercel provider script" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
 
         $scriptContent | Should -Match '/v11/projects'
+    }
+
+    It "updates project link and production branch through the Vercel project API" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
+
+        $scriptContent | Should -Match '/v9/projects/\$resolvedProjectName'
+        $scriptContent | Should -Match 'productionBranch'
+        $scriptContent | Should -Match 'repo'
+        $scriptContent | Should -Match 'type'
     }
 
     It "upserts environment variables through the Vercel env API" {

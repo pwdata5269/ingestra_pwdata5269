@@ -49,7 +49,7 @@ The repo currently automates or validates these areas:
 The repo does not yet fully automate:
 
 - `Supabase` post-create configuration
-- `Vercel` project creation and environment-variable wiring
+- `Vercel` GitHub repository linkage and environment-variable wiring
 - `n8n` deployment and CI-compatible validation
 - full end-to-end upload, retrieval, and chat fixtures
 

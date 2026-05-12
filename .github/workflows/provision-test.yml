@@ -87,6 +87,13 @@ jobs:
             -Action EnsureProject `
             -ConfigPath .\config\automation-config.json
 
+      - name: Ensure Vercel project link
+        shell: pwsh
+        run: |
+          .\scripts\providers\Vercel.ps1 `
+            -Action EnsureProjectLink `
+            -ConfigPath .\config\automation-config.json
+
       - name: Validate smoke-test bootstrap contract
         if: ${{ inputs.run_smoke_tests }}
         shell: pwsh

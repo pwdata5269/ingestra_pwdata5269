@@ -36,6 +36,7 @@ For this repo, that means automation should own creation or confirmation of:
 - the `Supabase` project
 - the Azure app registration for `Supabase` login once the `Supabase` project ref exists
 - the `Vercel` project
+- the `Vercel` GitHub repository link and production branch mapping
 - the `Pinecone` index
 - later `n8n` deployment and configuration steps
 
@@ -111,7 +112,7 @@ Current repo entry points:
 Later provider entry points should be added for:
 
 - `Supabase` project creation and post-create configuration
-- `Vercel` project creation and environment-variable wiring
+- `Vercel` project creation, repo linkage, and environment-variable wiring
 - `n8n` deployment validation
 
 ## Execution Flow
@@ -126,18 +127,20 @@ The intended automation flow is:
 6. configure `Supabase` auth to use the Azure sign-in app
 7. create or confirm the `Pinecone` index
 8. create or confirm the `Vercel` project
-9. apply provider-specific settings
-10. run smoke tests when enabled
-11. publish logs, summaries, and test reports
+9. create or confirm the `Vercel` GitHub repo link and production branch mapping
+10. apply provider-specific settings
+11. run smoke tests when enabled
+12. publish logs, summaries, and test reports
 
 ## Near-Term Sequence
 
 Use this order for the next implementation and verification work:
 
 1. implement `Vercel` project automation
-2. create a minimal frontend auth test page
-3. link the frontend to `Supabase` auth
-4. run an end-to-end Azure login test
+2. ensure the GitHub repository is linked to the `Vercel` project so pushes trigger deployments
+3. create a minimal frontend auth test page
+4. link the frontend to `Supabase` auth
+5. run an end-to-end Azure login test
 
 ## Provider Intent
 
@@ -179,6 +182,8 @@ Current proven result:
 Automation should:
 
 - create the target project
+- ensure the correct GitHub repository is linked to the project
+- ensure the correct production branch is configured
 - apply project-level configuration
 - later wire required environment variables
 
@@ -208,7 +213,8 @@ Automation is in the intended state when:
 Current gaps:
 
 - `Supabase` post-create configuration is not yet implemented
-- `Vercel` project automation is not implemented
+- `Vercel` GitHub repository linkage is not yet implemented
+- `Vercel` environment-variable wiring is not yet implemented
 - the current `Pinecone` script does not yet consume the JSON config file
 - integrated-embedding `Pinecone` index creation is not yet scripted
 - `n8n` automation is not yet implemented

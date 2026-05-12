@@ -17,6 +17,9 @@
   "vercel": {
     "createProject": true,
     "projectName": "ingestra-ci",
+    "gitProvider": "github",
+    "repo": "pwdata5269/ingestra_pwdata5269",
+    "productionBranch": "main",
     "scopeType": "personal",
     "teamId": "",
     "environmentVariableWiringEnabled": false

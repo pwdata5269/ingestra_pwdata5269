@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidateSet("ListProjects", "EnsureProject", "UpsertEnvironmentVariables")]
+    [ValidateSet("ListProjects", "EnsureProject", "EnsureProjectLink", "UpsertEnvironmentVariables")]
     [string]$Action,
 
     [Parameter()]
@@ -77,7 +77,7 @@ function Get-VercelApiUri {
 function Invoke-VercelApiRequest {
     param(
         [Parameter(Mandatory)]
-        [ValidateSet("GET", "POST")]
+        [ValidateSet("GET", "POST", "PATCH")]
         [string]$Method,
 
         [Parameter(Mandatory)]
@@ -119,6 +119,47 @@ function Resolve-VercelProjectName {
     }
 
     return $resolvedProjectName
+}
+
+function Get-GitHubRepositoryFromOrigin {
+    $remote = git remote get-url origin 2>$null
+    if ([string]::IsNullOrWhiteSpace($remote)) {
+        return $null
+    }
+
+    if ($remote -match 'github\.com[:/](?<owner>[^/]+)/(?<repo>[^/.]+)(?:\.git)?$') {
+        return "{0}/{1}" -f $Matches.owner, $Matches.repo
+    }
+
+    return $null
+}
+
+function Resolve-VercelRepositoryLinkInputs {
+    $gitProvider = [string](Get-VercelConfigValue -PropertyName "gitProvider")
+    $repo = [string](Get-VercelConfigValue -PropertyName "repo")
+    $productionBranch = [string](Get-VercelConfigValue -PropertyName "productionBranch")
+
+    if ([string]::IsNullOrWhiteSpace($gitProvider)) {
+        $gitProvider = "github"
+    }
+
+    if ([string]::IsNullOrWhiteSpace($repo)) {
+        $repo = Get-GitHubRepositoryFromOrigin
+    }
+
+    if ([string]::IsNullOrWhiteSpace($productionBranch)) {
+        $productionBranch = "main"
+    }
+
+    if ([string]::IsNullOrWhiteSpace($repo)) {
+        throw "vercel.repo is required in config or must be derivable from the origin remote."
+    }
+
+    [pscustomobject]@{
+        GitProvider      = $gitProvider
+        Repo             = $repo
+        ProductionBranch = $productionBranch
+    }
 }
 
 function Get-VercelProjects {
@@ -198,6 +239,59 @@ switch ($Action) {
         Set-IngestraOutput -Name "vercel_project_id" -Value ([string]$created.id)
         Set-IngestraOutput -Name "vercel_project_name" -Value ([string]$created.name)
         $created | ConvertTo-Json -Depth 10
+        break
+    }
+
+    "EnsureProjectLink" {
+        $resolvedProjectName = Resolve-VercelProjectName
+        $linkInputs = Resolve-VercelRepositoryLinkInputs
+        $project = Get-VercelProjectByName -Name $resolvedProjectName
+
+        if ($null -eq $project) {
+            throw "Vercel project '$resolvedProjectName' was not found."
+        }
+
+        $currentLink = $project.link
+        $isLinked = (
+            $null -ne $currentLink -and
+            [string]$currentLink.type -eq $linkInputs.GitProvider -and
+            [string]$currentLink.repo -eq $linkInputs.Repo -and
+            [string]$currentLink.productionBranch -eq $linkInputs.ProductionBranch
+        )
+
+        if ($isLinked) {
+            Write-Host "Vercel project '$resolvedProjectName' is already linked to '$($linkInputs.Repo)'."
+            Write-IngestraSummary -Lines @(
+                "## Vercel",
+                "- Action: ensure project link",
+                "- Result: already linked",
+                ("- Project name: {0}" -f $resolvedProjectName),
+                ("- Repo: {0}" -f $linkInputs.Repo),
+                ("- Production branch: {0}" -f $linkInputs.ProductionBranch)
+            )
+            $project | ConvertTo-Json -Depth 10
+            break
+        }
+
+        $body = @{
+            link = @{
+                type = $linkInputs.GitProvider
+                repo = $linkInputs.Repo
+                productionBranch = $linkInputs.ProductionBranch
+            }
+        }
+
+        $uri = Get-VercelApiUri -Path "/v9/projects/$resolvedProjectName"
+        $updated = Invoke-VercelApiRequest -Method PATCH -Uri $uri -Body $body
+        Write-IngestraSummary -Lines @(
+            "## Vercel",
+            "- Action: ensure project link",
+            "- Result: linked",
+            ("- Project name: {0}" -f $resolvedProjectName),
+            ("- Repo: {0}" -f $linkInputs.Repo),
+            ("- Production branch: {0}" -f $linkInputs.ProductionBranch)
+        )
+        $updated | ConvertTo-Json -Depth 10
         break
     }
 
