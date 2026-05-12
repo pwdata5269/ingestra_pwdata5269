@@ -1,0 +1,38 @@
+name: supabase-schema-test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  schema:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_ORG_SLUG: ${{ secrets.SUPABASE_ORG_SLUG }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Validate provision bootstrap contract
+        shell: pwsh
+        run: |
+          .\scripts\Test-BootstrapPrereqs.ps1 -Profile provision
+
+      - name: Ensure Supabase project
+        id: ensure_supabase
+        shell: pwsh
+        run: |
+          .\scripts\providers\Supabase.ps1 `
+            -Action EnsureProject `
+            -ConfigPath .\config\automation-config.json
+
+      - name: Ensure Supabase schema
+        shell: pwsh
+        run: |
+          .\scripts\providers\Supabase.ps1 `
+            -Action EnsureSchema `
+            -ProjectRef "${{ steps.ensure_supabase.outputs.supabase_project_ref }}" `
+            -ConfigPath .\config\automation-config.json
