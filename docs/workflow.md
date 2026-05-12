@@ -22,6 +22,7 @@ This repo owns the automation workflow around the `Ingestra` platform.
 - capture the resulting `Supabase` project ref
 - create or update the Azure app registration for `Supabase` login
 - emit a fresh usable Azure client secret for the current run
+- for schema application, use the stored `SUPABASE_DB_URL` session-pooler connection string with `psql`
 - create or confirm the vector index in `Pinecone`
 - create or confirm the `Vercel` project
 - create or confirm the `Vercel` GitHub repository link and production branch mapping after `Vercel` has already been granted access to the repository
@@ -34,6 +35,7 @@ This repo owns the automation workflow around the `Ingestra` platform.
 ### Test
 
 - run HTTP smoke tests for upload, retrieval, and chat
+- run isolated schema-application validation against `Supabase` using checked-in SQL migrations and `psql`
 - later: run fuller integration tests against seeded fixtures
 
 ## Vector Provider Contract

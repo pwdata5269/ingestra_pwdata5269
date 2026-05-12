@@ -57,6 +57,7 @@ Current required repository secrets:
 - `AZURE_CLIENT_SECRET`
 - `PINECONE_API_KEY`
 - `SUPABASE_ACCESS_TOKEN`
+- `SUPABASE_DB_URL`
 - `SUPABASE_ORG_SLUG`
 - `SUPABASE_DB_PASSWORD`
 - `VERCEL_TOKEN`
@@ -176,6 +177,7 @@ Automation should:
 - expose the resulting project ref needed by the Azure redirect URI
 - configure Azure auth to use the generated Azure sign-in app
 - apply checked-in SQL schema files for post-create configuration
+- use `SUPABASE_DB_URL` as the current source of truth for the session-pooler connection string when applying schema migrations
 - create the initial internal tables:
   - `pinecone_records`
   - `retrieval_result_logs`
@@ -189,6 +191,7 @@ Current proven result:
 - `EnsureProject` has successfully created the configured `Supabase` project in `GitHub Actions`
 - current project ref: `xshawwxhqjjbemptekjk`
 - Azure login is now visibly enabled in the live `Supabase` project
+- the current schema-automation contract uses a stored session-pooler connection string in `SUPABASE_DB_URL`
 
 Current declared next schema target:
 
@@ -261,7 +264,7 @@ Automation is in the intended state when:
 
 Current gaps:
 
-- `Supabase` post-create schema application is not yet automated through `PowerShell` and `GitHub Actions`
+- `Supabase` post-create schema application still needs to be proven end to end in `GitHub Actions`
 - `Vercel` GitHub repository authorization remains a one-time manual prerequisite
 - the current `Pinecone` script does not yet consume the JSON config file
 - integrated-embedding `Pinecone` index creation is not yet scripted

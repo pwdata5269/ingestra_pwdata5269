@@ -68,6 +68,7 @@ Current repo-owned automation expects these secrets when relevant:
 - `AZURE_CLIENT_ID`
 - `AZURE_CLIENT_SECRET`
 - `SUPABASE_ACCESS_TOKEN`
+- `SUPABASE_DB_URL`
 - `SUPABASE_ORG_SLUG`
 - `SUPABASE_DB_PASSWORD`
 - `VERCEL_TOKEN`
@@ -81,6 +82,12 @@ Optional or later secrets:
 - `INGESTRA_UPLOAD_URL`
 - `INGESTRA_SEARCH_URL`
 - `INGESTRA_CHAT_URL`
+
+`SUPABASE_DB_URL` should currently be the real Supabase session-pooler connection string used for schema automation, for example:
+
+```text
+postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
+```
 
 ## Local Validation
 

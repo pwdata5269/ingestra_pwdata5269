@@ -12,10 +12,11 @@
 - `Supabase` auth is now visibly enabled for Azure login
 - `Vercel` project creation and GitHub repo linkage are now proven in `GitHub Actions`
 - the `Vercel` auth harness has been deployed successfully and Azure login through `Supabase` has been manually proven end to end
+- the current `Supabase` schema automation contract now uses checked-in SQL plus `SUPABASE_DB_URL` for the session-pooler connection string
 
 ## Next Tasks
 
-- implement `Supabase` post-create configuration steps, starting with applying checked-in SQL schema and RLS
+- prove `Supabase` post-create schema application end to end through the isolated schema workflow
 - define the `n8n` deployment model for CI-compatible validation
 - add environment-specific config templates
 - add end-to-end test fixtures for upload, retrieval, and chat

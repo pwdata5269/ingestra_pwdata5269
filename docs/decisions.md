@@ -143,3 +143,14 @@
   - the current `Vercel` auth harness is the canonical verification surface for the identity flow
   - future auth regressions can be checked quickly against the deployed harness
   - a clean `GitHub Actions` rerun should still be captured before treating the deploy workflow itself as fully proven
+
+### Supabase Schema Uses Stored Session Pooler URL
+
+- date: 2026-05-12
+- status: decided
+- choice: use a stored `SUPABASE_DB_URL` repository secret containing the Supabase session-pooler connection string for schema automation
+- rationale: this is simpler and more reliable in CI than reconstructing connection details dynamically or fighting CLI host-resolution edge cases
+- consequences:
+  - schema automation should use `psql` with `SUPABASE_DB_URL`
+  - the checked-in SQL remains the source of truth for schema and RLS
+  - `SUPABASE_DB_URL` becomes a post-project secret needed before schema automation can run

@@ -36,6 +36,7 @@ Record these values securely during the runbook:
 - `AZURE_CLIENT_ID`
 - `AZURE_CLIENT_SECRET`
 - `SUPABASE_ACCESS_TOKEN`
+- `SUPABASE_DB_URL`
 - `SUPABASE_ORG_SLUG`
 - `SUPABASE_DB_PASSWORD`
 - `VERCEL_TOKEN`
@@ -233,6 +234,23 @@ Phase 1 is complete when all of the following are true:
 - `validate.yml` passes
 
 At this point, provider account and org bootstrap is complete and project-level automation can be exercised.
+
+## Post-Project Secret For Schema Automation
+
+After the automated `Supabase` project has been created, capture the project database session-pooler connection string from `Supabase` and store it in `GitHub Actions` as:
+
+- `SUPABASE_DB_URL`
+
+Use the real session-pooler string from `Connect`, for example:
+
+```text
+postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
+```
+
+Acceptance criteria:
+
+- `SUPABASE_DB_URL` exists in `GitHub Actions` repository secrets
+- the value is the real session-pooler connection string for the created project
 
 ## Phase 2. Runtime Host And n8n Preparation
 
