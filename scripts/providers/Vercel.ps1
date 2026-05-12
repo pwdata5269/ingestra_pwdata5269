@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidateSet("ListProjects", "EnsureProject", "EnsureProjectLink", "GetProjectDomains", "UpsertEnvironmentVariables")]
+    [ValidateSet("ListProjects", "EnsureProject", "EnsureProjectLink", "GetProjectDomains", "UpsertEnvironmentVariables", "EnsureDeploymentProtection", "DeployProject")]
     [string]$Action,
 
     [Parameter()]
@@ -209,6 +209,23 @@ function Resolve-VercelRepositoryLinkInputs {
     }
 }
 
+function Get-VercelProjectSetting {
+    param(
+        [Parameter(Mandatory)]
+        [string]$PropertyName,
+
+        [Parameter()]
+        [object]$DefaultValue
+    )
+
+    $value = Get-VercelConfigValue -PropertyName $PropertyName
+    if ($null -eq $value -or [string]::IsNullOrWhiteSpace([string]$value)) {
+        return $DefaultValue
+    }
+
+    return $value
+}
+
 function Get-VercelProjects {
     $uri = Get-VercelApiUri -Path "/v10/projects"
     $response = Invoke-VercelApiRequest -Method GET -Uri $uri
@@ -317,6 +334,10 @@ function Resolve-VercelBrowserUrls {
         PreviewWildcardUrl    = "https://*-$suffix/**"
         ProductionDomain      = $productionDomain
     }
+}
+
+function Resolve-VercelRepositoryRoot {
+    return (Get-Location).Path
 }
 
 switch ($Action) {
@@ -485,6 +506,89 @@ switch ($Action) {
             ("- Variable count: {0}" -f $vars.Count)
         )
         $result | ConvertTo-Json -Depth 10
+        break
+    }
+
+    "EnsureDeploymentProtection" {
+        $resolvedProjectName = Resolve-VercelProjectName
+        $project = Get-VercelProjectByName -Name $resolvedProjectName
+
+        if ($null -eq $project) {
+            throw "Vercel project '$resolvedProjectName' was not found."
+        }
+
+        $desiredMode = [string](Get-VercelProjectSetting -PropertyName "deploymentProtectionMode" -DefaultValue "preview")
+        $currentMode = $null
+        $ssoProtectionProperty = $project.PSObject.Properties["ssoProtection"]
+        if ($null -ne $ssoProtectionProperty -and $null -ne $ssoProtectionProperty.Value) {
+            $currentMode = [string]$ssoProtectionProperty.Value.deploymentType
+        }
+
+        if ($currentMode -eq $desiredMode) {
+            Write-IngestraSummary -Lines @(
+                "## Vercel",
+                "- Action: ensure deployment protection",
+                "- Result: already configured",
+                ("- Project name: {0}" -f $resolvedProjectName),
+                ("- Deployment protection mode: {0}" -f $desiredMode)
+            )
+            $project | ConvertTo-Json -Depth 10
+            break
+        }
+
+        $body = @{
+            ssoProtection = @{
+                deploymentType = $desiredMode
+            }
+        }
+
+        $uri = Get-VercelApiUri -Path "/v9/projects/$resolvedProjectName"
+        $updated = Invoke-VercelApiRequest -Method PATCH -Uri $uri -Body $body
+        Write-IngestraSummary -Lines @(
+            "## Vercel",
+            "- Action: ensure deployment protection",
+            "- Result: configured",
+            ("- Project name: {0}" -f $resolvedProjectName),
+            ("- Deployment protection mode: {0}" -f $desiredMode)
+        )
+        $updated | ConvertTo-Json -Depth 10
+        break
+    }
+
+    "DeployProject" {
+        $resolvedProjectName = Resolve-VercelProjectName
+        $project = Get-VercelProjectByName -Name $resolvedProjectName
+
+        if ($null -eq $project) {
+            throw "Vercel project '$resolvedProjectName' was not found."
+        }
+
+        $repositoryRoot = Resolve-VercelRepositoryRoot
+        $cliEnvironment = @{
+            VERCEL_PROJECT_ID = [string]$project.id
+            VERCEL_ORG_ID     = if (-not [string]::IsNullOrWhiteSpace($teamId)) { $teamId } else { [string]$project.accountId }
+        }
+
+        Invoke-VercelCliCommand -Arguments @("pull", "--yes", "--environment=production", "--token", $token, "--cwd", $repositoryRoot) -EnvironmentVariables $cliEnvironment | Out-Null
+        Invoke-VercelCliCommand -Arguments @("build", "--prod", "--token", $token, "--cwd", $repositoryRoot) -EnvironmentVariables $cliEnvironment | Out-Null
+        $deploymentUrl = (Invoke-VercelCliCommand -Arguments @("deploy", "--prebuilt", "--prod", "--token", $token, "--cwd", $repositoryRoot) -EnvironmentVariables $cliEnvironment).Trim()
+
+        if ([string]::IsNullOrWhiteSpace($deploymentUrl)) {
+            throw "Vercel deployment URL was not returned."
+        }
+
+        Set-IngestraOutput -Name "vercel_deployment_url" -Value $deploymentUrl
+        Write-IngestraSummary -Lines @(
+            "## Vercel",
+            "- Action: deploy project",
+            "- Result: deployed",
+            ("- Project name: {0}" -f $resolvedProjectName),
+            ("- Deployment URL: {0}" -f $deploymentUrl)
+        )
+
+        [pscustomobject]@{
+            deployment_url = $deploymentUrl
+        } | ConvertTo-Json -Depth 10
         break
     }
 }

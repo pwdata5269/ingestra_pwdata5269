@@ -132,6 +132,21 @@ jobs:
             -Action UpsertEnvironmentVariables `
             -ConfigPath .\config\automation-config.json
 
+      - name: Ensure Vercel deployment protection
+        shell: pwsh
+        run: |
+          .\scripts\providers\Vercel.ps1 `
+            -Action EnsureDeploymentProtection `
+            -ConfigPath .\config\automation-config.json
+
+      - name: Deploy frontend to Vercel
+        id: deploy_frontend_to_vercel
+        shell: pwsh
+        run: |
+          .\scripts\providers\Vercel.ps1 `
+            -Action DeployProject `
+            -ConfigPath .\config\automation-config.json
+
       - name: Validate smoke-test bootstrap contract
         if: ${{ inputs.run_smoke_tests }}
         shell: pwsh

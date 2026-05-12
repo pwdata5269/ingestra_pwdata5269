@@ -22,7 +22,9 @@
     "productionBranch": "main",
     "scopeType": "personal",
     "teamId": "",
-    "environmentVariableWiringEnabled": false
+    "environmentVariableWiringEnabled": false,
+    "deploymentMode": "cli",
+    "deploymentProtectionMode": "preview"
   },
   "frontend": {
     "localDevelopmentUrl": "http://localhost:3000",

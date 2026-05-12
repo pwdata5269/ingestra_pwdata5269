@@ -21,6 +21,18 @@ Describe "Vercel provider script" {
         $scriptContent | Should -Match '"GetProjectDomains"'
     }
 
+    It "accepts EnsureDeploymentProtection as a supported action" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
+
+        $scriptContent | Should -Match '"EnsureDeploymentProtection"'
+    }
+
+    It "accepts DeployProject as a supported action" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
+
+        $scriptContent | Should -Match '"DeployProject"'
+    }
+
     It "accepts UpsertEnvironmentVariables as a supported action" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
 
@@ -65,11 +77,29 @@ Describe "Vercel provider script" {
         $scriptContent | Should -Match 'vercel_preview_wildcard_url'
     }
 
+    It "can configure deployment protection for public production access" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
+
+        $scriptContent | Should -Match 'EnsureDeploymentProtection'
+        $scriptContent | Should -Match 'ssoProtection'
+        $scriptContent | Should -Match 'deploymentType'
+    }
+
     It "upserts environment variables through the Vercel env API" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
 
         $scriptContent | Should -Match '/v10/projects/\$resolvedProjectName/env'
         $scriptContent | Should -Match 'upsert = "true"'
         $scriptContent | Should -Match 'SUPABASE_PUBLIC_KEY'
+    }
+
+    It "supports CI-driven production deployment through the Vercel CLI" {
+        $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
+
+        $scriptContent | Should -Match 'vercel_deployment_url'
+        $scriptContent | Should -Match 'Invoke-VercelCliCommand -Arguments @\("pull", "--yes", "--environment=production"'
+        $scriptContent | Should -Match 'Invoke-VercelCliCommand -Arguments @\("build", "--prod"'
+        $scriptContent | Should -Match 'Invoke-VercelCliCommand -Arguments @\("deploy", "--prebuilt", "--prod"'
+        $scriptContent | Should -Match '--prebuilt'
     }
 }
