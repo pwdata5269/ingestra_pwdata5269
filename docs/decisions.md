@@ -99,3 +99,14 @@
   - `Supabase` now visibly shows Azure login as enabled
   - the next major implementation target is `Vercel` project automation
   - the next major validation target is an end-to-end browser login test through the minimal frontend
+
+### Vercel Git Authorization Boundary
+
+- date: 2026-05-12
+- status: decided
+- choice: treat `Vercel` access to the target `GitHub` repository as a one-time manual bootstrap prerequisite, while keeping project creation and repo linkage as automation-owned steps after that access exists
+- rationale: the live workflow proved that project creation succeeds but repository connection fails until `Vercel` has been explicitly authorized to see and use the repository
+- consequences:
+  - the human bootstrap runbook must require `Vercel` GitHub authorization before provisioning
+  - automation may assume repository visibility only after that prerequisite is complete
+  - `Vercel` repo-link failures before authorization should be treated as bootstrap gaps, not script defects

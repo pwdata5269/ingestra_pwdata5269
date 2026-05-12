@@ -14,7 +14,9 @@
 ## Next Tasks
 
 - implement `Supabase` post-create configuration steps
-- implement `Vercel` project creation, GitHub repo linkage, and environment-variable wiring
+- complete the one-time manual `Vercel` GitHub repository authorization/bootstrap step
+- revalidate `Vercel` project creation and GitHub repo linkage after the manual authorization step
+- implement `Vercel` environment-variable wiring
 - create a minimal frontend auth test page on `Vercel`
 - run an end-to-end Azure login test through `Supabase`
 - define the `n8n` deployment model for CI-compatible validation
@@ -37,7 +39,7 @@
 - the repo can rerun provider automation safely without duplicating resources
 - the repo can create or update the Azure login app and emit a usable client secret for the current run
 - the repo can configure `Supabase` to use Azure login successfully
-- the repo can create a `Vercel` project and ensure pushes from the linked GitHub repo trigger deployments
+- the repo can create a `Vercel` project and, once `Vercel` has been granted access to the repository, ensure pushes from the linked GitHub repo trigger deployments
 - the repo can create or reset a test `Pinecone` index from CI inputs
 - smoke tests can fail fast with actionable output
 - future `Qdrant` support can be added without reworking the entire repo shape

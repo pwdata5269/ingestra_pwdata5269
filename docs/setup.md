@@ -26,6 +26,7 @@ These steps are intentionally manual because automation cannot safely begin befo
 - create or confirm the base `Supabase` account/org
 - create a `Supabase` PAT with rights to manage projects
 - create or confirm the base `Vercel` account/team
+- authorize `Vercel` to access the target `GitHub` repository or repository set
 - create a `Vercel` token with project-management rights
 - create or confirm the base `Pinecone` account and API key
 - create or confirm the Azure bootstrap app registration and required bootstrap permissions
@@ -42,6 +43,7 @@ The repo currently automates or validates these areas:
 - secret contract validation
 - `Supabase` project creation
 - Azure app-registration creation or update for `Supabase` login
+- `Vercel` project creation
 - `Pester` test execution in CI
 - `Pinecone` index creation, confirmation, and deletion
 - basic smoke-test execution against configured HTTP endpoints
@@ -49,7 +51,9 @@ The repo currently automates or validates these areas:
 The repo does not yet fully automate:
 
 - `Supabase` post-create configuration
-- `Vercel` GitHub repository linkage and environment-variable wiring
+- one-time `Vercel` GitHub repository authorization
+- `Vercel` GitHub repository linkage revalidation after the manual authorization step
+- `Vercel` environment-variable wiring
 - `n8n` deployment and CI-compatible validation
 - full end-to-end upload, retrieval, and chat fixtures
 

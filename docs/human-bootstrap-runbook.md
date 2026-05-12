@@ -129,16 +129,20 @@ Do this:
 
 1. Log in to `Vercel`.
 2. Create or confirm the correct account or team.
-3. Create a token with project-management rights.
-4. Decide whether automation will target personal scope or team scope.
-5. If using a team, record the `teamId`.
-6. Record:
+3. Authorize `Vercel` to access the target `GitHub` owner or repository set.
+4. Confirm the target repository is visible to `Vercel` for import or connection.
+5. Create a token with project-management rights.
+6. Decide whether automation will target personal scope or team scope.
+7. If using a team, record the `teamId`.
+8. Record:
    - `VERCEL_TOKEN`
    - optional `VERCEL_TEAM_ID`
 
 Acceptance criteria:
 
 - the correct Vercel scope exists
+- `Vercel` has been granted access to the target `GitHub` repository
+- the target repository is visible to `Vercel`
 - the token exists
 - the automation target scope is recorded
 
@@ -220,6 +224,7 @@ Phase 1 is complete when all of the following are true:
 - the Azure bootstrap values are available
 - the `Supabase` organization exists and management token exists
 - the `Vercel` account or team exists and the token exists
+- `Vercel` has been granted access to the target `GitHub` repository
 - the `Pinecone` API key exists
 - required `GitHub Actions` repository secrets are populated
 - `validate.yml` passes
@@ -276,6 +281,7 @@ Human bootstrap is complete when all of the following are true:
 - the Azure bootstrap values are available
 - the `Supabase` organization exists and management token exists
 - the `Vercel` account or team exists and the token exists
+- `Vercel` has been granted access to the target `GitHub` repository
 - the `Pinecone` API key exists
 - required `GitHub Actions` secrets are populated
 - `validate.yml` passes

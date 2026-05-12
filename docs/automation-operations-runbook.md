@@ -19,6 +19,7 @@ Human bootstrap should establish only the trust and access prerequisites:
 - tokens, API keys, and secrets
 - Azure consent and identity prerequisites
 - GitHub repository and Actions access
+- `Vercel` GitHub authorization so the target repository is visible for connection
 
 Project-level resources belong to automation wherever feasible.
 
@@ -36,7 +37,7 @@ For this repo, that means automation should own creation or confirmation of:
 - the `Supabase` project
 - the Azure app registration for `Supabase` login once the `Supabase` project ref exists
 - the `Vercel` project
-- the `Vercel` GitHub repository link and production branch mapping
+- the `Vercel` GitHub repository link and production branch mapping after the repository has been authorized and exposed to `Vercel`
 - the `Pinecone` index
 - later `n8n` deployment and configuration steps
 
@@ -127,7 +128,7 @@ The intended automation flow is:
 6. configure `Supabase` auth to use the Azure sign-in app
 7. create or confirm the `Pinecone` index
 8. create or confirm the `Vercel` project
-9. create or confirm the `Vercel` GitHub repo link and production branch mapping
+9. create or confirm the `Vercel` GitHub repo link and production branch mapping after human bootstrap has granted `Vercel` access to the repository
 10. apply provider-specific settings
 11. run smoke tests when enabled
 12. publish logs, summaries, and test reports
@@ -137,7 +138,7 @@ The intended automation flow is:
 Use this order for the next implementation and verification work:
 
 1. implement `Vercel` project automation
-2. ensure the GitHub repository is linked to the `Vercel` project so pushes trigger deployments
+2. ensure the GitHub repository is linked to the `Vercel` project so pushes trigger deployments, assuming `Vercel` has already been granted access to that repository
 3. create a minimal frontend auth test page
 4. link the frontend to `Supabase` auth
 5. run an end-to-end Azure login test
@@ -182,7 +183,7 @@ Current proven result:
 Automation should:
 
 - create the target project
-- ensure the correct GitHub repository is linked to the project
+- ensure the correct GitHub repository is linked to the project after `Vercel` can already see that repository
 - ensure the correct production branch is configured
 - apply project-level configuration
 - later wire required environment variables
@@ -213,7 +214,8 @@ Automation is in the intended state when:
 Current gaps:
 
 - `Supabase` post-create configuration is not yet implemented
-- `Vercel` GitHub repository linkage is not yet implemented
+- `Vercel` GitHub repository authorization remains a one-time manual prerequisite
+- `Vercel` GitHub repository linkage needs to be revalidated after the manual authorization step is complete
 - `Vercel` environment-variable wiring is not yet implemented
 - the current `Pinecone` script does not yet consume the JSON config file
 - integrated-embedding `Pinecone` index creation is not yet scripted
