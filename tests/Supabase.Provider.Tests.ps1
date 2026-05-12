@@ -75,8 +75,12 @@ Describe "Supabase provider script" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Supabase.ps1" -Raw
 
         $scriptContent | Should -Match 'supabase\\migrations'
-        $scriptContent | Should -Match 'supabase@latest'
-        $scriptContent | Should -Match '"db", "push", "--db-url"'
+        $scriptContent | Should -Match 'function Get-PsqlCommand'
+        $scriptContent | Should -Match 'psql is required for EnsureSchema'
+        $scriptContent | Should -Match 'function Invoke-PostgresSqlFile'
+        $scriptContent | Should -Match '"--dbname=\$DbUrl"'
+        $scriptContent | Should -Match '"-v" "ON_ERROR_STOP=1"'
+        $scriptContent | Should -Match 'foreach \(\$migrationFile in \$migrationFiles\)'
         $scriptContent | Should -Match 'Get-SupabaseProjectDetails'
         $scriptContent | Should -Match '\$project\.database\.host'
         $scriptContent | Should -Match '@\$databaseHost:5432/postgres'

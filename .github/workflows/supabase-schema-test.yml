@@ -16,6 +16,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install PostgreSQL client
+        shell: pwsh
+        run: |
+          choco install postgresql --yes --no-progress --params '"/Password:postgres"'
+
       - name: Validate Supabase schema bootstrap contract
         shell: pwsh
         run: |

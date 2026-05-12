@@ -236,20 +236,33 @@ function Get-SupabaseDbUrl {
     return "postgresql://postgres:$encodedPassword@$databaseHost:5432/postgres"
 }
 
-function Invoke-SupabaseCliCommand {
+function Get-PsqlCommand {
+    $command = Get-Command psql -ErrorAction SilentlyContinue
+    if ($null -eq $command) {
+        throw "psql is required for EnsureSchema but was not found in PATH."
+    }
+
+    return $command.Source
+}
+
+function Invoke-PostgresSqlFile {
     param(
         [Parameter(Mandatory)]
-        [string[]]$Arguments
+        [string]$DbUrl,
+
+        [Parameter(Mandatory)]
+        [string]$FilePath
     )
 
-    $output = & npx "supabase@latest" @Arguments 2>&1
+    $psqlPath = Get-PsqlCommand
+    $output = & $psqlPath "--dbname=$DbUrl" "-v" "ON_ERROR_STOP=1" "-f" $FilePath 2>&1
     $exitCode = $LASTEXITCODE
     if ($output) {
         $output | ForEach-Object { Write-Host $_ }
     }
 
     if ($exitCode -ne 0) {
-        throw "Supabase CLI command failed with exit code $exitCode."
+        throw "psql failed with exit code $exitCode."
     }
 
     return ($output | Out-String)
@@ -369,7 +382,9 @@ switch ($Action) {
         $dbUrl = Get-SupabaseDbUrl -Ref $resolvedProjectRef
         $migrationFiles = @(Get-SupabaseMigrationFilePaths)
 
-        Invoke-SupabaseCliCommand -Arguments @("db", "push", "--db-url", $dbUrl, "--include-all")
+        foreach ($migrationFile in $migrationFiles) {
+            Invoke-PostgresSqlFile -DbUrl $dbUrl -FilePath $migrationFile.FullName | Out-Null
+        }
 
         Write-IngestraSummary -Lines @(
             "## Supabase Schema",
