@@ -217,6 +217,16 @@ function Get-SupabaseDbUrl {
         throw "SUPABASE_DB_URL is required for EnsureSchema."
     }
 
+    if ($dbUrl -match '\[PASSWORD\]') {
+        $dbPassword = [Environment]::GetEnvironmentVariable("SUPABASE_DB_PASSWORD")
+        if ([string]::IsNullOrWhiteSpace($dbPassword)) {
+            throw "SUPABASE_DB_PASSWORD is required when SUPABASE_DB_URL contains [PASSWORD]."
+        }
+
+        $encodedPassword = [System.Uri]::EscapeDataString($dbPassword)
+        $dbUrl = $dbUrl.Replace("[PASSWORD]", $encodedPassword)
+    }
+
     return $dbUrl
 }
 
