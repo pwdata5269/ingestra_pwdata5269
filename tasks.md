@@ -17,6 +17,7 @@
 ## Next Tasks
 
 - prove `Supabase` post-create schema application end to end through the isolated schema workflow
+- confirm the `supabase-schema-ready` environment gate and approval path are working as intended for maintainers
 - define the `n8n` deployment model for CI-compatible validation
 - add environment-specific config templates
 - add end-to-end test fixtures for upload, retrieval, and chat

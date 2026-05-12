@@ -140,6 +140,15 @@ The intended automation flow is:
 13. run smoke tests when enabled
 14. publish logs, summaries, and test reports
 
+For isolated schema validation, the current intended flow is:
+
+1. run `supabase-schema-test`
+2. let `ensure-project` create or confirm the `Supabase` project
+3. read the workflow summary for the project ref and expected `SUPABASE_DB_URL` format
+4. add or confirm `SUPABASE_DB_URL`
+5. approve the `supabase-schema-ready` environment
+6. let `ensure-schema` apply the checked-in SQL through `psql`
+
 ## Near-Term Sequence
 
 Use this order for the next implementation and verification work:
@@ -192,6 +201,7 @@ Current proven result:
 - current project ref: `xshawwxhqjjbemptekjk`
 - Azure login is now visibly enabled in the live `Supabase` project
 - the current schema-automation contract uses a stored session-pooler connection string in `SUPABASE_DB_URL`
+- the current isolated schema workflow pauses at `supabase-schema-ready` so a human can confirm or add `SUPABASE_DB_URL` before schema application
 
 Current declared next schema target:
 

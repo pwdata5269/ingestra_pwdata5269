@@ -36,6 +36,7 @@ This repo owns the automation workflow around the `Ingestra` platform.
 
 - run HTTP smoke tests for upload, retrieval, and chat
 - run isolated schema-application validation against `Supabase` using checked-in SQL migrations and `psql`
+- for the isolated schema workflow, pause on the `supabase-schema-ready` environment so a human can confirm `SUPABASE_DB_URL` before schema application continues
 - later: run fuller integration tests against seeded fixtures
 
 ## Vector Provider Contract

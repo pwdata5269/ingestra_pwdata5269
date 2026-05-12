@@ -252,6 +252,26 @@ Acceptance criteria:
 - `SUPABASE_DB_URL` exists in `GitHub Actions` repository secrets
 - the value is the real session-pooler connection string for the created project
 
+## Environment Approval For Schema Automation
+
+Before running the gated schema workflow path, create or confirm the GitHub Actions environment:
+
+- `supabase-schema-ready`
+
+Do this:
+
+1. Open repository `Settings`.
+2. Open `Environments`.
+3. Create `supabase-schema-ready` if it does not already exist.
+4. Add required reviewers if you want the schema job to pause for explicit approval.
+5. Confirm the operator knows they must update or confirm `SUPABASE_DB_URL` before approving the schema job.
+
+Acceptance criteria:
+
+- the `supabase-schema-ready` environment exists
+- required reviewers are configured if approval is desired
+- the operator knows the schema job will pause there until approval
+
 ## Phase 2. Runtime Host And n8n Preparation
 
 This phase prepares the VPS-hosted runtime estate after the provider/org bootstrap has been validated.

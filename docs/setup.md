@@ -49,6 +49,7 @@ The repo currently automates or validates these areas:
 - generation of a static frontend runtime config during CI for the auth harness
 - direct frontend deployment to `Vercel` from `GitHub Actions`
 - browser-based Azure login verification through the deployed auth harness
+- gated schema validation against `Supabase` using `SUPABASE_DB_URL`, `psql`, and the `supabase-schema-ready` environment
 - `Pester` test execution in CI
 - `Pinecone` index creation, confirmation, and deletion
 - basic smoke-test execution against configured HTTP endpoints
