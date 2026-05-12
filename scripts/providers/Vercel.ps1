@@ -133,8 +133,14 @@ function Invoke-VercelCliCommand {
             $output | ForEach-Object { Write-Host $_ }
         }
 
-        if ($exitCode -ne 0 -and $outputText -notmatch 'already connected to your project') {
+        $toleratedAlreadyConnected = $outputText -match 'already connected to your project'
+
+        if ($exitCode -ne 0 -and -not $toleratedAlreadyConnected) {
             throw "Vercel CLI command failed with exit code $exitCode."
+        }
+
+        if ($toleratedAlreadyConnected) {
+            $global:LASTEXITCODE = 0
         }
 
         return $outputText
