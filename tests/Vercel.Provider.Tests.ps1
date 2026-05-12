@@ -30,11 +30,11 @@ Describe "Vercel provider script" {
     It "updates project link and production branch through the Vercel project API" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
 
-        $scriptContent | Should -Match '/v9/projects/\$resolvedProjectName'
-        $scriptContent | Should -Match 'gitRepository'
-        $scriptContent | Should -Match 'productionBranch'
-        $scriptContent | Should -Match 'repo'
-        $scriptContent | Should -Match 'type'
+        $scriptContent | Should -Match 'function Invoke-VercelCliCommand'
+        $scriptContent | Should -Match 'vercel@latest'
+        $scriptContent | Should -Match 'git", "connect"'
+        $scriptContent | Should -Match 'VERCEL_PROJECT_ID'
+        $scriptContent | Should -Match 'VERCEL_ORG_ID'
     }
 
     It "handles projects that do not yet expose a link property" {

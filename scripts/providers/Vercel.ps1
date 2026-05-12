@@ -107,6 +107,44 @@ function Invoke-VercelApiRequest {
     Invoke-RestMethod @params
 }
 
+function Invoke-VercelCliCommand {
+    param(
+        [Parameter(Mandatory)]
+        [string[]]$Arguments,
+
+        [Parameter()]
+        [hashtable]$EnvironmentVariables
+    )
+
+    $savedValues = @{}
+
+    if ($EnvironmentVariables) {
+        foreach ($entry in $EnvironmentVariables.GetEnumerator()) {
+            $savedValues[$entry.Key] = [Environment]::GetEnvironmentVariable($entry.Key)
+            [Environment]::SetEnvironmentVariable($entry.Key, [string]$entry.Value)
+        }
+    }
+
+    try {
+        $output = & npx "vercel@latest" @Arguments 2>&1
+        $exitCode = $LASTEXITCODE
+        if ($output) {
+            $output | ForEach-Object { Write-Host $_ }
+        }
+
+        if ($exitCode -ne 0) {
+            throw "Vercel CLI command failed with exit code $exitCode."
+        }
+    }
+    finally {
+        if ($EnvironmentVariables) {
+            foreach ($entry in $EnvironmentVariables.GetEnumerator()) {
+                [Environment]::SetEnvironmentVariable($entry.Key, $savedValues[$entry.Key])
+            }
+        }
+    }
+}
+
 function Resolve-VercelProjectName {
     $resolvedProjectName = $ProjectName
 
@@ -287,16 +325,14 @@ switch ($Action) {
             break
         }
 
-        $body = @{
-            gitRepository = @{
-                type = $linkInputs.GitProvider
-                repo = $linkInputs.Repo
-                productionBranch = $linkInputs.ProductionBranch
-            }
+        $cliEnvironment = @{
+            VERCEL_PROJECT_ID = [string]$project.id
+            VERCEL_ORG_ID     = if (-not [string]::IsNullOrWhiteSpace($teamId)) { $teamId } else { [string]$project.accountId }
         }
 
-        $uri = Get-VercelApiUri -Path "/v9/projects/$resolvedProjectName"
-        $updated = Invoke-VercelApiRequest -Method PATCH -Uri $uri -Body $body
+        Invoke-VercelCliCommand -Arguments @("git", "connect", "--yes", "--token", $token) -EnvironmentVariables $cliEnvironment
+
+        $updated = Get-VercelProjectByName -Name $resolvedProjectName
         Write-IngestraSummary -Lines @(
             "## Vercel",
             "- Action: ensure project link",
