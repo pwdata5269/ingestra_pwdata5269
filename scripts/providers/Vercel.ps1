@@ -340,6 +340,21 @@ function Resolve-VercelRepositoryRoot {
     return (Get-Location).Path
 }
 
+function Resolve-VercelDeploymentUrl {
+    param(
+        [Parameter(Mandatory)]
+        [string]$CliOutput
+    )
+
+    $cleanOutput = ($CliOutput -replace '\x1B\[[0-9;]*[A-Za-z]', '')
+    $matches = [regex]::Matches($cleanOutput, 'https://[^\s]+\.vercel\.app')
+    if ($matches.Count -eq 0) {
+        return $null
+    }
+
+    return [string]$matches[$matches.Count - 1].Value
+}
+
 switch ($Action) {
     "ListProjects" {
         $projects = Get-VercelProjects
@@ -571,7 +586,8 @@ switch ($Action) {
 
         Invoke-VercelCliCommand -Arguments @("pull", "--yes", "--environment=production", "--token", $token, "--cwd", $repositoryRoot) -EnvironmentVariables $cliEnvironment | Out-Null
         Invoke-VercelCliCommand -Arguments @("build", "--prod", "--token", $token, "--cwd", $repositoryRoot) -EnvironmentVariables $cliEnvironment | Out-Null
-        $deploymentUrl = (Invoke-VercelCliCommand -Arguments @("deploy", "--prebuilt", "--prod", "--token", $token, "--cwd", $repositoryRoot) -EnvironmentVariables $cliEnvironment).Trim()
+        $deploymentOutput = Invoke-VercelCliCommand -Arguments @("deploy", "--prebuilt", "--prod", "--token", $token, "--cwd", $repositoryRoot) -EnvironmentVariables $cliEnvironment
+        $deploymentUrl = Resolve-VercelDeploymentUrl -CliOutput $deploymentOutput
 
         if ([string]::IsNullOrWhiteSpace($deploymentUrl)) {
             throw "Vercel deployment URL was not returned."

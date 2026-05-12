@@ -97,9 +97,11 @@ Describe "Vercel provider script" {
         $scriptContent = Get-Content "$PSScriptRoot\..\scripts\providers\Vercel.ps1" -Raw
 
         $scriptContent | Should -Match 'vercel_deployment_url'
+        $scriptContent | Should -Match 'function Resolve-VercelDeploymentUrl'
         $scriptContent | Should -Match 'Invoke-VercelCliCommand -Arguments @\("pull", "--yes", "--environment=production"'
         $scriptContent | Should -Match 'Invoke-VercelCliCommand -Arguments @\("build", "--prod"'
         $scriptContent | Should -Match 'Invoke-VercelCliCommand -Arguments @\("deploy", "--prebuilt", "--prod"'
         $scriptContent | Should -Match '--prebuilt'
+        $scriptContent | Should -Match 'https://\[\^\\s\]\+\\\.vercel\\\.app'
     }
 }
